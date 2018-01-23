@@ -72,6 +72,128 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
 
+class Search:
+    def __init__(self, problem):
+        from util import Stack
+        self.expandedCoordinates = {}
+        self.unvisitedCoordinates = Stack()
+        self.problem = problem
+
+        self.DEBUG_STEP = False
+        self.DEBUG_PRINTS = False
+
+    def run(self):
+        node = None
+
+        while True:
+            if self.DEBUG_STEP:
+                raw_input()
+
+            node = self.visitNext(node)
+
+            if None == node:
+                break
+
+            if self.problem.isGoalState(node):
+                if self.DEBUG_PRINTS:
+                    print "Next node to visit is goal state. Node is: " + str(node)
+                break
+
+        # TODO return list of directions which lead to goal state
+        return node
+
+    # Update nodes which can be visited and give next node to visit
+    def visitNext(self, node):
+        if None == node:
+            self.addUnvisitedNode(self.problem.getStartState())
+        else:
+            # DFS will always want to try and expand current node
+            self.expand(node)
+
+        # Visited nodes have now been updated if necessary. Data structure
+        # containing unvisited nodes should now give correct next node on
+        # next access.
+        nextNode = self.pickNextNode()
+
+        return nextNode
+
+    # Add successors of node to structure of unvisited nodes
+    def expand(self, node):
+        if self.DEBUG_PRINTS:
+            print "Expanding node: " + str(node)
+
+        if self.isAlreadyExpanded(node):
+            return
+
+        # Avoid adding node under expansion to unvisited nodes. Change if
+        # causes problems.
+        self.markExpanded(node)
+
+        successors = self.problem.getSuccessors(node)
+
+        for s in successors:
+            if self.isAlreadyExpanded(s):
+                continue
+            self.addUnvisitedNode(s)
+
+        if self.DEBUG_PRINTS:
+            print "Done expanding node: " + str(node)
+
+    def isAlreadyExpanded(self, node):
+        try:
+            coordinates = self.extractCoordinates(node)
+            alreadyExpanded = self.expandedCoordinates[coordinates]
+        except KeyError:
+            if self.DEBUG_PRINTS:
+                print "Index " + str(coordinates) + " not found from expandedCoordinates"
+            alreadyExpanded = False
+
+        if True != alreadyExpanded and False != alreadyExpanded:
+            raise Exception("Unexpected value in alreadyExpanded: " + str(alreadyExpanded));
+
+        return alreadyExpanded
+
+    def markExpanded(self, node):
+        if self.DEBUG_PRINTS:
+            print "Consider following node as expanded: " + str(node)
+
+        coordinates = self.extractCoordinates(node)
+        self.expandedCoordinates[coordinates] = True
+
+    def addUnvisitedNode(self, data):
+        if self.DEBUG_PRINTS:
+            print "Adding unvisited coordinates from data: " + str(data)
+
+        coordinates = self.extractCoordinates(data)
+
+        if self.DEBUG_PRINTS:
+            print "Pushing coordinates" + str(coordinates)
+
+        self.unvisitedCoordinates.push(coordinates)
+
+    def pickNextNode(self):
+        if self.DEBUG_PRINTS:
+            print "Picking next node from unvisitedCoordinates: " + str(self.unvisitedCoordinates)
+
+        if not self.unvisitedCoordinates.isEmpty():
+            return self.unvisitedCoordinates.pop()
+
+        return None
+
+    # Need to handle following different cases:
+    # * getStartState() returns a tuple with coordinates.
+    # * getSuccessors() returns a tuple which contains:
+    #       1. tuple with coordinates
+    #       2. Direction
+    #       3. Cost(?)
+    def extractCoordinates(self, data):
+        if tuple is type(data[0]):
+            return data[0]
+        elif tuple is type(data):
+            return data
+        else:
+            raise Exception("Failed to extract coordinates from data: " + str(data))
+
 def depthFirstSearch(problem):
     """
     Search the deepest nodes in the search tree first.
@@ -87,6 +209,26 @@ def depthFirstSearch(problem):
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
     "*** YOUR CODE HERE ***"
+
+    import time
+
+    search = Search(problem)
+    startTime = time.time()
+    result = search.run()
+    stopTime = time.time()
+
+    searchFinishBanner = "\n"
+    searchFinishBanner += "==================== Search Done ====================" + "\n"
+    searchFinishBanner += "Got search result: " + str(result) + "\n"
+    searchFinishBanner += "Result is goal state? -> " + str(problem.isGoalState(result)) + "\n"
+    searchFinishBanner += "Search took %s seconds" % (stopTime - startTime) + "\n"
+    searchFinishBanner += "==================== Search Done ====================" + "\n"
+
+    print searchFinishBanner
+
+    latestRunFile = open('latest_run.txt', 'w')
+    latestRunFile.write(searchFinishBanner)
+
     util.raiseNotDefined()
 
 def breadthFirstSearch(problem):
