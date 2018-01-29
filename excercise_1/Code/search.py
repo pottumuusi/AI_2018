@@ -75,6 +75,8 @@ def tinyMazeSearch(problem):
 class Search:
     def __init__(self, problem):
         from util import Stack
+        self.parents = {}
+        self.finalCoordinates = None
         self.expandedCoordinates = {}
         self.unvisitedCoordinates = Stack()
         self.problem = problem
@@ -94,18 +96,21 @@ class Search:
             if None == node:
                 break
 
-            if self.problem.isGoalState(node):
+            latestCoordinates = self.extractCoordinates(node)
+            if self.problem.isGoalState(latestCoordinates):
                 if self.DEBUG_PRINTS:
                     print "Next node to visit is goal state. Node is: " + str(node)
                 break
 
-        # TODO return list of directions which lead to goal state
-        return node
+        self.finalCoordinates = latestCoordinates
+        return self.constructRoute()
 
     # Update nodes which can be visited and give next node to visit
     def visitNext(self, node):
         if None == node:
-            self.addUnvisitedNode(self.problem.getStartState())
+            startState = self.problem.getStartState()
+            self.addUnvisitedNode(startState)
+            self.addNodeParent(startState, None) # Starting node has no parent
         else:
             # DFS will always want to try and expand current node
             self.expand(node)
@@ -113,11 +118,14 @@ class Search:
         # Visited nodes have now been updated if necessary. Data structure
         # containing unvisited nodes should now give correct next node on
         # next access.
-        nextNode = self.pickNextNode()
+        nextCoordinates = self.pickNextCoordinates()
+        nextNode = self.makeNode(nextCoordinates)
 
         return nextNode
 
-    # Add successors of node to structure of unvisited nodes
+    # Add successors of node to structure of unvisited nodes.
+    # Link successors to node under expansion by adding current node as a
+    # parent for all successors.
     def expand(self, node):
         if self.DEBUG_PRINTS:
             print "Expanding node: " + str(node)
@@ -129,15 +137,41 @@ class Search:
         # causes problems.
         self.markExpanded(node)
 
-        successors = self.problem.getSuccessors(node)
-
+        coordinates = self.extractCoordinates(node)
+        successors = self.problem.getSuccessors(coordinates)
         for s in successors:
             if self.isAlreadyExpanded(s):
                 continue
             self.addUnvisitedNode(s)
+            self.addNodeParent(s, coordinates)
 
         if self.DEBUG_PRINTS:
             print "Done expanding node: " + str(node)
+
+    # Generate list of directions from starting position to finish.
+    def constructRoute(self):
+        route = []
+        nextCoordinates = self.finalCoordinates
+
+        while True:
+            nextParent = self.parents[nextCoordinates]
+
+            if self.isParentStartingPosition(nextParent):
+                break
+
+            nextDirection = self.extractDirection(nextParent)
+            nextCoordinates = self.extractCoordinates(nextParent)
+            self.parentSanityCheck(nextParent, nextDirection, nextCoordinates)
+
+            route.append(nextDirection)
+
+        # Flip route as it is currently from finish to start
+        route.reverse()
+
+        if self.DEBUG_PRINTS:
+            routeDebugPrint(route)
+
+        return route
 
     def isAlreadyExpanded(self, node):
         try:
@@ -171,14 +205,27 @@ class Search:
 
         self.unvisitedCoordinates.push(coordinates)
 
-    def pickNextNode(self):
+    def pickNextCoordinates(self):
         if self.DEBUG_PRINTS:
-            print "Picking next node from unvisitedCoordinates: " + str(self.unvisitedCoordinates)
+            print "Picking next coordinate from unvisitedCoordinates: " + str(self.unvisitedCoordinates)
 
         if not self.unvisitedCoordinates.isEmpty():
             return self.unvisitedCoordinates.pop()
 
         return None
+
+    def addNodeParent(self, successor, parentCoordinates):
+        successorCoordinates = self.extractCoordinates(successor)
+        successorDirection = self.extractDirection(successor)
+        parent = (parentCoordinates, successorDirection)
+
+        self.parents[successorCoordinates] = parent
+
+        if self.DEBUG_PRINTS:
+            print "Added parent: " + str(parent)
+
+    def makeNode(self, coordinates):
+        return (coordinates, None, None)
 
     # Need to handle following different cases:
     # * getStartState() returns a tuple with coordinates.
@@ -193,6 +240,34 @@ class Search:
             return data
         else:
             raise Exception("Failed to extract coordinates from data: " + str(data))
+
+    def extractDirection(self, data):
+        if tuple is type(data[0]):
+            return data[1]
+        elif tuple is type(data):
+            # First state does not contain direction
+            return None
+        else:
+            raise Exception("Failed to extract direction from data: " + str(data))
+
+    def getFinalCoordinates(self):
+        return self.finalCoordinates
+
+    def isParentStartingPosition(self, parent):
+        return None == self.extractDirection(parent)
+
+    def parentSanityCheck(self, parent, direction, coordinates):
+        if None == direction:
+            raise Exception("Could not extract direction from parent: " + str(parent))
+
+        if None == coordinates:
+            raise Exception("Could not extract coordinates from parent: " + str(parent))
+
+    def routeDebugPrint(self, route):
+        print "---== Printing route ==---"
+        for d in route:
+            print str(d)
+        print "---== Done printing route ==---"
 
 def depthFirstSearch(problem):
     """
@@ -214,13 +289,15 @@ def depthFirstSearch(problem):
 
     search = Search(problem)
     startTime = time.time()
-    result = search.run()
+    route = search.run()
     stopTime = time.time()
+
+    finalCoordinates = search.getFinalCoordinates()
 
     searchFinishBanner = "\n"
     searchFinishBanner += "==================== Search Done ====================" + "\n"
-    searchFinishBanner += "Got search result: " + str(result) + "\n"
-    searchFinishBanner += "Result is goal state? -> " + str(problem.isGoalState(result)) + "\n"
+    searchFinishBanner += "Got route: " + str(route) + "\n"
+    searchFinishBanner += "Result is goal state? -> " + str(problem.isGoalState(finalCoordinates)) + "\n"
     searchFinishBanner += "Search took %s seconds" % (stopTime - startTime) + "\n"
     searchFinishBanner += "==================== Search Done ====================" + "\n"
 
@@ -229,7 +306,7 @@ def depthFirstSearch(problem):
     latestRunFile = open('latest_run.txt', 'w')
     latestRunFile.write(searchFinishBanner)
 
-    util.raiseNotDefined()
+    return route
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
