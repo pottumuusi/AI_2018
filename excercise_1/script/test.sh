@@ -29,17 +29,17 @@ run_tests() {
 	echo "" > $test_results_file
 
 	cd ../Code
-	$selected_python pacman.py -l tinyMaze -p $search_agent
+	$selected_python pacman.py --frameTime 0 -l tinyMaze -p $search_agent
 	ret=$?
 	cat $latest_run_file >> "$test_results_path"
 	echo "Ret is: $ret" >> "$test_results_path"
 
-	$selected_python pacman.py -l mediumMaze -p $search_agent
+	$selected_python pacman.py --frameTime 0 -l mediumMaze -p $search_agent
 	ret=$?
 	cat $latest_run_file >> "$test_results_path"
 	echo "Ret is: $ret" >> "$test_results_path"
 
-	$selected_python pacman.py -l bigMaze -z .5 -p $search_agent
+	$selected_python pacman.py --frameTime 0 -l bigMaze -z .5 -p $search_agent
 	ret=$?
 	cat $latest_run_file >> "$test_results_path"
 	echo "Ret is: $ret" >> "$test_results_path"
