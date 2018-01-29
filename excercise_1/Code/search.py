@@ -173,7 +173,7 @@ class Search:
         route.reverse()
 
         if self.DEBUG_PRINTS:
-            routeDebugPrint(route)
+            self.routeDebugPrint(route)
 
         return route
 
