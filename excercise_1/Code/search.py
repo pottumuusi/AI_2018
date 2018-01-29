@@ -83,6 +83,10 @@ class Search:
 
         self.DEBUG_STEP = False
         self.DEBUG_PRINTS = False
+        self.SUPPRESS_ERRORS = False
+
+        self.COORDINATES_POSITION = 0
+        self.DIRECTION_POSITION = 1
 
     def run(self):
         node = None
@@ -234,27 +238,55 @@ class Search:
     #       2. Direction
     #       3. Cost(?)
     def extractCoordinates(self, data):
-        if tuple is type(data[0]):
-            return data[0]
-        elif tuple is type(data):
+        if self.hasCoordinate(data) or self.hasAutograderCoordinate(data):
+            return data[self.COORDINATES_POSITION]
+
+        if self.isBareCoordinate(data):
             return data
-        else:
-            raise Exception("Failed to extract coordinates from data: " + str(data))
+
+        raise Exception("Failed to extract coordinates from data: " + str(data))
 
     def extractDirection(self, data):
-        if tuple is type(data[0]):
-            return data[1]
-        elif tuple is type(data):
-            # First state does not contain direction
-            return None
-        else:
-            raise Exception("Failed to extract direction from data: " + str(data))
+        def directionFromData(d):
+            dataLen = len(d) # Trying to get length of int led to exception
+
+            if self.dataHasDirection(d, dataLen) or self.dataHasAutograderDirection(d, dataLen):
+                return data[self.DIRECTION_POSITION]
+
+        try:
+            return directionFromData(data)
+        except TypeError as e:
+            if not self.SUPPRESS_ERRORS:
+                print "Could not get direction for node. Exception: " + str(e)
+
+        if self.isBareCoordinate(data) or self.isBareAutograderCoordinate(data):
+            return None # First state does not contain direction
+
+        raise Exception("Failed to extract direction from data: " + str(data))
 
     def getFinalCoordinates(self):
         return self.finalCoordinates
 
     def isParentStartingPosition(self, parent):
         return None == self.extractDirection(parent)
+
+    def hasAutograderCoordinate(self, data):
+        return str is type(data[self.COORDINATES_POSITION])
+
+    def hasCoordinate(self, data):
+        return tuple is type(data[self.COORDINATES_POSITION])
+
+    def isBareCoordinate(self, data):
+        return tuple is type(data) and 2 == len(data)
+
+    def isBareAutograderCoordinate(self, data):
+        return str is type(data)
+
+    def dataHasDirection(self, data, dataLen):
+        return dataLen > 1 and self.hasCoordinate(data)
+
+    def dataHasAutograderDirection(self, data, dataLen):
+        return dataLen > 1 and self.hasAutograderCoordinate(data)
 
     def parentSanityCheck(self, parent, direction, coordinates):
         if None == direction:
