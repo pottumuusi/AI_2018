@@ -76,6 +76,9 @@ class Search:
     def __init__(self, problem, searchType):
         from util import Stack
         from util import Queue
+        from util import PriorityQueue
+
+        from game import Directions
 
         self.DEBUG_STEP = False
         self.DEBUG_PRINTS = False
@@ -85,6 +88,7 @@ class Search:
         self.DIRECTION_POSITION = 1
         self.DFS_TYPE = "dfs"
         self.BFS_TYPE = "bfs"
+        self.UCS_TYPE = "ucs"
 
         self.problem = problem
         self.searchType = searchType
@@ -98,6 +102,8 @@ class Search:
             self.unvisitedCoordinates = Stack()
         elif self.isBreadthFirstSearch():
             self.unvisitedCoordinates = Queue()
+        elif self.isUniformCostSearch():
+            self.unvisitedCoordinates = PriorityQueue()
         else:
             raise Exception("Unknown search type: " + searchType)
 
@@ -120,7 +126,7 @@ class Search:
                 break
 
         self.finalCoordinates = latestCoordinates
-        return self.constructRoute()
+        return self.constructFinalRoute()
 
     # Update nodes which can be visited and give next node to visit
     def visitNext(self, node):
@@ -167,13 +173,27 @@ class Search:
                 continue
             if self.isAlreadyExpanded(s):
                 continue
-            self.addUnvisitedNode(s)
+            # Add parent before adding unvisited nodes as route might need
+            # to be constructed. Route is needed at least for getting a cost
+            # for route leading to successor being added.
             self.addNodeParent(s, coordinates)
+            self.addUnvisitedNode(s)
 
-    # Generate list of directions from starting position to finish.
-    def constructRoute(self):
+    # Generate list of directions leading from starting position to passed
+    # coordinates.
+    def constructRoute(self, initialCoordinates):
         route = []
-        nextCoordinates = self.finalCoordinates
+        nextCoordinates = initialCoordinates
+
+        if self.DEBUG_PRINTS:
+            print "Constructing route starting from: " + str(initialCoordinates)
+
+        try:
+            nextParent = self.parents[nextCoordinates]
+        except KeyError:
+            # No parent for given initial coordinates. Expect these
+            # to be the coordinates of first node.
+            return route
 
         while True:
             nextParent = self.parents[nextCoordinates]
@@ -194,6 +214,10 @@ class Search:
             self.routeDebugPrint(route)
 
         return route
+
+    # Generate list of directions from starting position to finish.
+    def constructFinalRoute(self):
+        return self.constructRoute(self.finalCoordinates)
 
     def isAlreadyExpanded(self, node):
         try:
@@ -233,10 +257,24 @@ class Search:
 
         coordinates = self.extractCoordinates(data)
 
-        if self.DEBUG_PRINTS:
-            print "Pushing coordinates" + str(coordinates)
+        if self.isUniformCostSearch():
+            newDirection = self.extractDirection(data)
+            route = self.constructRoute(coordinates)
 
-        self.unvisitedCoordinates.push(coordinates)
+            if self.DEBUG_PRINTS:
+                print "Getting cost of actions for route: " + str(route)
+
+            cost = self.problem.getCostOfActions(route)
+
+            if self.DEBUG_PRINTS:
+                print "Pushing coordinates" + str(coordinates) + " With cost: " + str(cost)
+
+            self.unvisitedCoordinates.push(coordinates, cost)
+        else:
+            if self.DEBUG_PRINTS:
+                print "Pushing coordinates" + str(coordinates)
+            self.unvisitedCoordinates.push(coordinates)
+
         self.discoveredCoordinates[coordinates] = True
 
     def pickNextCoordinates(self):
@@ -324,6 +362,9 @@ class Search:
     def isBreadthFirstSearch(self):
         return self.BFS_TYPE == self.searchType
 
+    def isUniformCostSearch(self):
+        return self.UCS_TYPE == self.searchType
+
     def parentSanityCheck(self, parent, direction, coordinates):
         if None == direction:
             raise Exception("Could not extract direction from parent: " + str(parent))
@@ -401,7 +442,22 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    import time
+
+    search = Search(problem, "ucs")
+    startTime = time.time()
+    route = search.run()
+    stopTime = time.time()
+
+    finalCoordinates = search.getFinalCoordinates()
+    searchFinishBanner = getSearchFinishBanner(route, finalCoordinates, problem, stopTime - startTime)
+
+    print searchFinishBanner
+    latestRunFile = open('latest_run.txt', 'w')
+    latestRunFile.write(searchFinishBanner)
+
+    return route
 
 def nullHeuristic(state, problem=None):
     """
