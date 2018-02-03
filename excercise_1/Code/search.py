@@ -92,6 +92,7 @@ class Search:
         self.parents = {}
         self.finalCoordinates = None
         self.expandedCoordinates = {}
+        self.discoveredCoordinates = {}
 
         if self.isDepthFirstSearch():
             self.unvisitedCoordinates = Stack()
@@ -162,6 +163,8 @@ class Search:
         coordinates = self.extractCoordinates(node)
         successors = self.problem.getSuccessors(coordinates)
         for s in successors:
+            if self.isBreadthFirstSearch() and self.isAlreadyDiscovered(s):
+                continue
             if self.isAlreadyExpanded(s):
                 continue
             self.addUnvisitedNode(s)
@@ -206,6 +209,17 @@ class Search:
 
         return alreadyExpanded
 
+    def isAlreadyDiscovered(self, node):
+        try:
+            coordinates = self.extractCoordinates(node)
+            alreadyDiscovered = self.discoveredCoordinates[coordinates]
+        except KeyError:
+            if self.DEBUG_PRINTS:
+                print "Index " + str(coordinates) + " not found from discoveredCoordinates"
+            alreadyDiscovered = False
+
+        return alreadyDiscovered
+
     def markExpanded(self, node):
         if self.DEBUG_PRINTS:
             print "Consider following node as expanded: " + str(node)
@@ -223,6 +237,7 @@ class Search:
             print "Pushing coordinates" + str(coordinates)
 
         self.unvisitedCoordinates.push(coordinates)
+        self.discoveredCoordinates[coordinates] = True
 
     def pickNextCoordinates(self):
         if self.DEBUG_PRINTS:
