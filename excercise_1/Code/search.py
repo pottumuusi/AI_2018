@@ -73,13 +73,9 @@ def tinyMazeSearch(problem):
     return  [s, s, w, s, w, w, s, w]
 
 class Search:
-    def __init__(self, problem):
+    def __init__(self, problem, searchType):
         from util import Stack
-        self.parents = {}
-        self.finalCoordinates = None
-        self.expandedCoordinates = {}
-        self.unvisitedCoordinates = Stack()
-        self.problem = problem
+        from util import Queue
 
         self.DEBUG_STEP = False
         self.DEBUG_PRINTS = False
@@ -87,6 +83,22 @@ class Search:
 
         self.COORDINATES_POSITION = 0
         self.DIRECTION_POSITION = 1
+        self.DFS_TYPE = "dfs"
+        self.BFS_TYPE = "bfs"
+
+        self.problem = problem
+        self.searchType = searchType
+
+        self.parents = {}
+        self.finalCoordinates = None
+        self.expandedCoordinates = {}
+
+        if self.isDepthFirstSearch():
+            self.unvisitedCoordinates = Stack()
+        elif self.isBreadthFirstSearch():
+            self.unvisitedCoordinates = Queue()
+        else:
+            raise Exception("Unknown search type: " + searchType)
 
     def run(self):
         node = None
@@ -141,6 +153,12 @@ class Search:
         # causes problems.
         self.markExpanded(node)
 
+        self.handleFringe(node)
+
+        if self.DEBUG_PRINTS:
+            print "Done expanding node: " + str(node)
+
+    def handleFringe(self, node):
         coordinates = self.extractCoordinates(node)
         successors = self.problem.getSuccessors(coordinates)
         for s in successors:
@@ -148,9 +166,6 @@ class Search:
                 continue
             self.addUnvisitedNode(s)
             self.addNodeParent(s, coordinates)
-
-        if self.DEBUG_PRINTS:
-            print "Done expanding node: " + str(node)
 
     # Generate list of directions from starting position to finish.
     def constructRoute(self):
@@ -288,6 +303,12 @@ class Search:
     def dataHasAutograderDirection(self, data, dataLen):
         return dataLen > 1 and self.hasAutograderCoordinate(data)
 
+    def isDepthFirstSearch(self):
+        return self.DFS_TYPE == self.searchType
+
+    def isBreadthFirstSearch(self):
+        return self.BFS_TYPE == self.searchType
+
     def parentSanityCheck(self, parent, direction, coordinates):
         if None == direction:
             raise Exception("Could not extract direction from parent: " + str(parent))
@@ -300,6 +321,15 @@ class Search:
         for d in route:
             print str(d)
         print "---== Done printing route ==---"
+
+def getSearchFinishBanner(route, finalCoordinates, problem, searchTime):
+    searchFinishBanner = "\n"
+    searchFinishBanner += "==================== Search Done ====================" + "\n"
+    searchFinishBanner += "Got route: " + str(route) + "\n"
+    searchFinishBanner += "Result is goal state? -> " + str(problem.isGoalState(finalCoordinates)) + "\n"
+    searchFinishBanner += "Search took %s seconds" % (searchTime) + "\n"
+    searchFinishBanner += "==================== Search Done ====================" + "\n"
+    return searchFinishBanner
 
 def depthFirstSearch(problem):
     """
@@ -319,22 +349,15 @@ def depthFirstSearch(problem):
 
     import time
 
-    search = Search(problem)
+    search = Search(problem, "dfs")
     startTime = time.time()
     route = search.run()
     stopTime = time.time()
 
     finalCoordinates = search.getFinalCoordinates()
-
-    searchFinishBanner = "\n"
-    searchFinishBanner += "==================== Search Done ====================" + "\n"
-    searchFinishBanner += "Got route: " + str(route) + "\n"
-    searchFinishBanner += "Result is goal state? -> " + str(problem.isGoalState(finalCoordinates)) + "\n"
-    searchFinishBanner += "Search took %s seconds" % (stopTime - startTime) + "\n"
-    searchFinishBanner += "==================== Search Done ====================" + "\n"
+    searchFinishBanner = getSearchFinishBanner(route, finalCoordinates, problem, stopTime - startTime)
 
     print searchFinishBanner
-
     latestRunFile = open('latest_run.txt', 'w')
     latestRunFile.write(searchFinishBanner)
 
@@ -343,7 +366,22 @@ def depthFirstSearch(problem):
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    import time
+
+    search = Search(problem, "bfs")
+    startTime = time.time()
+    route = search.run()
+    stopTime = time.time()
+
+    finalCoordinates = search.getFinalCoordinates()
+    searchFinishBanner = getSearchFinishBanner(route, finalCoordinates, problem, stopTime - startTime)
+
+    print searchFinishBanner
+    latestRunFile = open('latest_run.txt', 'w')
+    latestRunFile.write(searchFinishBanner)
+
+    return route
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
