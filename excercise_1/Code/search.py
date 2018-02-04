@@ -77,11 +77,13 @@ class Search:
         from util import Stack
         from util import Queue
         from util import PriorityQueue
+        from util import InformativePriorityQueue
 
         from game import Directions
 
         self.DEBUG_STEP = False
         self.DEBUG_PRINTS = False
+        self.DEBUG_ROUTE_PRINTS = False
         self.SUPPRESS_ERRORS = False
 
         self.COORDINATES_POSITION = 0
@@ -89,6 +91,7 @@ class Search:
         self.DFS_TYPE = "dfs"
         self.BFS_TYPE = "bfs"
         self.UCS_TYPE = "ucs"
+        self.EMPTY_NODE = (None, None, None)
 
         self.problem = problem
         self.searchType = searchType
@@ -96,14 +99,14 @@ class Search:
         self.parents = {}
         self.finalCoordinates = None
         self.expandedCoordinates = {}
-        self.discoveredCoordinates = {}
+        self.rawNodes = {}
 
         if self.isDepthFirstSearch():
             self.unvisitedCoordinates = Stack()
         elif self.isBreadthFirstSearch():
             self.unvisitedCoordinates = Queue()
         elif self.isUniformCostSearch():
-            self.unvisitedCoordinates = PriorityQueue()
+            self.unvisitedCoordinates = InformativePriorityQueue()
         else:
             raise Exception("Unknown search type: " + searchType)
 
@@ -116,13 +119,14 @@ class Search:
 
             node = self.visitNext(node)
 
-            if None == node:
+            # All nodes processed
+            if self.EMPTY_NODE == node:
                 break
 
             latestCoordinates = self.extractCoordinates(node)
-            if self.problem.isGoalState(latestCoordinates):
-                if self.DEBUG_PRINTS:
-                    print "Next node to visit is goal state. Node is: " + str(node)
+            isGoalState = self.isNodeGoalState(node)
+
+            if isGoalState:
                 break
 
         self.finalCoordinates = latestCoordinates
@@ -167,12 +171,27 @@ class Search:
 
     def handleFringe(self, node):
         coordinates = self.extractCoordinates(node)
-        successors = self.problem.getSuccessors(coordinates)
+
+        try:
+            successors = self.problem.getSuccessors(coordinates)
+        except TypeError:
+            # At least in some autograder cases a node was required instead of
+            # coordinates to get successors.
+            rawNode = self.getRawNode(coordinates)
+            successors = self.problem.getSuccessors(rawNode)
+
         for s in successors:
+            if self.isAlreadyExpanded(s):
+                # No updates if already expanded.
+                continue
             if self.isBreadthFirstSearch() and self.isAlreadyDiscovered(s):
                 continue
-            if self.isAlreadyExpanded(s):
+            if self.isUniformCostSearch() and self.isAlreadyDiscovered(s):
+                # It is possible for uniform search to find a lower cost route
+                # to a node.
+                self.updateUnvisitedNode(s, coordinates)
                 continue
+
             # Add parent before adding unvisited nodes as route might need
             # to be constructed. Route is needed at least for getting a cost
             # for route leading to successor being added.
@@ -210,7 +229,7 @@ class Search:
         # Flip route as it is currently from finish to start
         route.reverse()
 
-        if self.DEBUG_PRINTS:
+        if self.DEBUG_ROUTE_PRINTS:
             self.routeDebugPrint(route)
 
         return route
@@ -234,15 +253,37 @@ class Search:
         return alreadyExpanded
 
     def isAlreadyDiscovered(self, node):
+        alreadyDiscovered = None
+
         try:
             coordinates = self.extractCoordinates(node)
-            alreadyDiscovered = self.discoveredCoordinates[coordinates]
+            self.rawNodes[coordinates]
+            alreadyDiscovered = True
         except KeyError:
             if self.DEBUG_PRINTS:
-                print "Index " + str(coordinates) + " not found from discoveredCoordinates"
+                print "Index " + str(coordinates) + " not found from rawNodes"
             alreadyDiscovered = False
 
+        if None == alreadyDiscovered:
+            raise Exception("Failed to check if node is already discovered")
+
         return alreadyDiscovered
+
+    def isNodeGoalState(self, node):
+        goalState = False
+        coordinates = self.extractCoordinates(node)
+
+        try:
+            goalState = self.problem.isGoalState(coordinates)
+        except AttributeError:
+            # At least in some autograder cases a node was required instead of
+            # coordinates to check for goal state.
+            rawNode = self.getRawNode(coordinates)
+            if self.DEBUG_PRINTS:
+                print "Querying goal state with raw node: " + str(rawNode)
+            goalState = self.problem.isGoalState(rawNode)
+
+        return goalState
 
     def markExpanded(self, node):
         if self.DEBUG_PRINTS:
@@ -251,6 +292,30 @@ class Search:
         coordinates = self.extractCoordinates(node)
         self.expandedCoordinates[coordinates] = True
 
+    # Test if route leading to passed node has lower cost if its parent had
+    # the passed coordinates. Update node position in coordinates waiting to
+    # be picked and node parent if cost is lower.
+    def updateUnvisitedNode(self, data, parentCoordinates):
+        if not self.isUniformCostSearch():
+            raise Exception("Unexpected search updating visited node")
+
+        if self.DEBUG_PRINTS:
+            print "Updating unvisited node: " + str(data)
+
+        successorCoordinates = self.extractCoordinates(data)
+        newDirection = self.extractDirection(data)
+        route = self.constructRoute(parentCoordinates)
+        route.append(newDirection)
+
+        if self.DEBUG_PRINTS:
+            print "Getting cost of actions for route: " + str(route)
+
+        cost = self.problem.getCostOfActions(route)
+        wasChanged = self.unvisitedCoordinates.update(successorCoordinates, cost)
+
+        if wasChanged:
+            self.addNodeParent(data, parentCoordinates)
+
     def addUnvisitedNode(self, data):
         if self.DEBUG_PRINTS:
             print "Adding unvisited coordinates from data: " + str(data)
@@ -258,12 +323,7 @@ class Search:
         coordinates = self.extractCoordinates(data)
 
         if self.isUniformCostSearch():
-            newDirection = self.extractDirection(data)
             route = self.constructRoute(coordinates)
-
-            if self.DEBUG_PRINTS:
-                print "Getting cost of actions for route: " + str(route)
-
             cost = self.problem.getCostOfActions(route)
 
             if self.DEBUG_PRINTS:
@@ -275,11 +335,11 @@ class Search:
                 print "Pushing coordinates" + str(coordinates)
             self.unvisitedCoordinates.push(coordinates)
 
-        self.discoveredCoordinates[coordinates] = True
+        self.rawNodes[coordinates] = data
 
     def pickNextCoordinates(self):
         if self.DEBUG_PRINTS:
-            print "Picking next coordinate from unvisitedCoordinates: " + str(self.unvisitedCoordinates)
+            print "<< Picking next coordinate from unvisitedCoordinates >>"
 
         if not self.unvisitedCoordinates.isEmpty():
             return self.unvisitedCoordinates.pop()
@@ -289,15 +349,18 @@ class Search:
     def addNodeParent(self, successor, parentCoordinates):
         successorCoordinates = self.extractCoordinates(successor)
         successorDirection = self.extractDirection(successor)
-        parent = (parentCoordinates, successorDirection)
+        parent = self.makeParent(parentCoordinates, successorDirection)
 
         self.parents[successorCoordinates] = parent
 
         if self.DEBUG_PRINTS:
-            print "Added parent: " + str(parent)
+            print "Added parent: " + str(parent) + " for: " + str(successorCoordinates)
 
     def makeNode(self, coordinates):
         return (coordinates, None, None)
+
+    def makeParent(self, parentCoordinates, successorDirection):
+        return (parentCoordinates, successorDirection)
 
     # Need to handle following different cases:
     # * getStartState() returns a tuple with coordinates.
@@ -334,6 +397,9 @@ class Search:
 
     def getFinalCoordinates(self):
         return self.finalCoordinates
+
+    def getRawNode(self, coordinates):
+        return self.rawNodes[coordinates]
 
     def isParentStartingPosition(self, parent):
         return None == self.extractDirection(parent)
@@ -374,17 +440,28 @@ class Search:
 
     def routeDebugPrint(self, route):
         print "---== Printing route ==---"
-        for d in route:
-            print str(d)
+        print str(route)
         print "---== Done printing route ==---"
 
 def getSearchFinishBanner(route, finalCoordinates, problem, searchTime):
+    bannerDisabled = True
+    isGoalState = None
+
+    if bannerDisabled:
+        return ""
+
+    try:
+        isGoalState = problem.isGoalState(finalCoordinates)
+    except AttributeError:
+        isGoalState = problem.isGoalState(search.getRawNode(finalCoordinates))
+
     searchFinishBanner = "\n"
     searchFinishBanner += "==================== Search Done ====================" + "\n"
     searchFinishBanner += "Got route: " + str(route) + "\n"
-    searchFinishBanner += "Result is goal state? -> " + str(problem.isGoalState(finalCoordinates)) + "\n"
+    searchFinishBanner += "Result is goal state? -> " + str(isGoalState) + "\n"
     searchFinishBanner += "Search took %s seconds" % (searchTime) + "\n"
     searchFinishBanner += "==================== Search Done ====================" + "\n"
+
     return searchFinishBanner
 
 def depthFirstSearch(problem):
