@@ -433,7 +433,7 @@ class Search:
         if self.hasCoordinate(data) or self.hasAutograderCoordinate(data):
             return data[self.COORDINATES_POSITION]
 
-        if self.isBareCoordinate(data):
+        if self.isBareCoordinate(data) or self.isBareAutograderCoordinate(data):
             return data
 
         raise Exception("Failed to extract coordinates from data: " + str(data))
@@ -466,7 +466,7 @@ class Search:
         return None == self.extractDirection(parent)
 
     def hasAutograderCoordinate(self, data):
-        return str is type(data[self.COORDINATES_POSITION])
+        return tuple is type(data) and str is type(data[self.COORDINATES_POSITION])
 
     def hasCoordinate(self, data):
         return tuple is type(data[self.COORDINATES_POSITION])
