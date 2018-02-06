@@ -145,8 +145,8 @@ class Search:
     def visitNext(self, node):
         if None == node:
             startState = self.problem.getStartState()
-            self.addUnvisitedNode(startState)
             self.addNodeParent(startState, None) # Starting node has no parent
+            self.addUnvisitedNode(startState)
         else:
             # DFS will always want to try and expand current node
             self.expand(node)
