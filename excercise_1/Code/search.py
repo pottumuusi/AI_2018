@@ -73,15 +73,15 @@ def tinyMazeSearch(problem):
     return  [s, s, w, s, w, w, s, w]
 
 class Search:
-    # If more parameters are needed for constructor do pass them in a dict
-    # which defaults to None.
-    def __init__(self, problem, searchType, heuristic=None):
+    def __init__(self, problem, searchType, heuristic=None, options={}):
         from util import Stack
         from util import Queue
         from util import PriorityQueue
         from util import InformativePriorityQueue
 
         from game import Directions
+
+        global OPT_KEY_MULTIPLE_GOALS
 
         self.DEBUG_STEP = False
         self.DEBUG_PRINTS = False
@@ -99,6 +99,7 @@ class Search:
         self.problem = problem
         self.searchType = searchType
         self.heuristic = heuristic
+        self.options = options
 
         self.parents = {}
         self.finalCoordinates = None
@@ -311,6 +312,8 @@ class Search:
         if self.DEBUG_PRINTS:
             print "Updating unvisited node: " + str(data)
 
+        costs = []
+
         successorCoordinates = self.extractCoordinates(data)
         newDirection = self.extractDirection(data)
         route = self.constructRoute(parentCoordinates)
@@ -320,14 +323,15 @@ class Search:
             print "Getting cost of actions for route: " + str(route)
 
         if self.isUniformCostSearch():
-            cost = self.problem.getCostOfActions(route)
+            costs.append(self.problem.getCostOfActions(route))
         elif self.isAstarSearch():
-            cost = self.calculateAstarCost(coordinates)
+            costs = self.calculateAstarCost(coordinates)
 
-        wasChanged = self.unvisitedCoordinates.update(successorCoordinates, cost)
+        for cost in costs:
+            wasChanged = self.unvisitedCoordinates.update(successorCoordinates, cost)
 
-        if wasChanged:
-            self.addNodeParent(data, parentCoordinates)
+            if wasChanged:
+                self.addNodeParent(data, parentCoordinates)
 
     def addUnvisitedNode(self, data):
         if self.DEBUG_PRINTS:
@@ -344,12 +348,13 @@ class Search:
 
             self.unvisitedCoordinates.push(coordinates, cost)
         elif self.isAstarSearch():
-            cost = self.calculateAstarCost(coordinates)
+            costs = self.calculateAstarCost(coordinates)
 
             if self.DEBUG_PRINTS:
-                print "Pushing coordinates: " + str(coordinates) + " With cost: " + str(cost)
+                print "Pushing coordinates: " + str(coordinates) + " With costs: " + str(costs)
 
-            self.unvisitedCoordinates.push(coordinates, cost)
+            for cost in costs:
+                self.unvisitedCoordinates.push(coordinates, cost)
         else:
             if self.DEBUG_PRINTS:
                 print "Pushing coordinates: " + str(coordinates)
@@ -358,21 +363,39 @@ class Search:
         self.rawNodes[coordinates] = data
 
     def calculateAstarCost(self, coordinates):
-        cost = None
+        costs = []
 
         route = self.constructRoute(coordinates)
         uniformCost = self.problem.getCostOfActions(route)
-        heuristicResult = self.heuristic(coordinates, self.problem)
-        greedyCost = heuristicResult
-        cost = uniformCost + greedyCost
+
+        if self.problemHasMultipleGoals():
+            costs = []
+            heuristicResult = self.heuristic(coordinates, self.problem)
+
+            for greedyCost in heuristicResult:
+                costs.append(greedyCost + uniformCost)
+        else:
+            # If one goal, then list to return contains only one item.
+            heuristicResult = self.heuristic(coordinates, self.problem)
+            greedyCost = heuristicResult
+            costs.append(uniformCost + greedyCost)
 
         if self.DEBUG_PRINTS:
             print "Got greedyCost: " + str(greedyCost) + " uniformCost: " + str(uniformCost)
 
-        if None == cost:
+        if [] == costs:
             raise Exception("Failed to calculate A* cost from coordinates: " + str(coordinates))
 
-        return cost
+        if not isinstance(costs, list):
+            raise Exception("Ended up with non-list costs: " + str(costs))
+
+        return costs
+
+    def calculateAstarCostForMultipleGoals(self, coordinates):
+        goals = self.problem.goals
+
+        for goal in goals:
+            heuristicResult = self
 
     def pickNextCoordinates(self):
         if self.DEBUG_PRINTS:
@@ -470,6 +493,12 @@ class Search:
 
     def isAstarSearch(self):
         return self.ASTAR_TYPE == self.searchType
+
+    def problemHasMultipleGoals(self):
+        try:
+            return self.options[OPT_KEY_MULTIPLE_GOALS]
+        except KeyError:
+            return False
 
     def parentSanityCheck(self, parent, direction, coordinates):
         if None == direction:
@@ -583,11 +612,33 @@ def nullHeuristic(state, problem=None):
     """
     return 0
 
+def isMultiGoalProblem(problem):
+    try:
+        goal = problem.goal
+        return False
+    except AttributeError:
+        pass
+
+    goals = problem.goals
+
+    return True
+
 def aStarSearch(problem, heuristic=None):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
 
     import time
+    from searchAgents import manhattanHeuristic
+    from searchAgents import manhattanHeuristicMultiGoal
+
+    options = {}
+
+    if None == heuristic:
+        heuristic = manhattanHeuristic
+
+    if isMultiGoalProblem(problem):
+        heuristic = manhattanHeuristicMultiGoal
+        options[OPT_KEY_MULTIPLE_GOALS] = True
 
     search = Search(problem, "astar", heuristic)
 
@@ -610,3 +661,5 @@ bfs = breadthFirstSearch
 dfs = depthFirstSearch
 astar = aStarSearch
 ucs = uniformCostSearch
+
+OPT_KEY_MULTIPLE_GOALS = "multiple_goals"

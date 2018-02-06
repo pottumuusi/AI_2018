@@ -256,6 +256,34 @@ def manhattanHeuristic(position, problem, info={}):
     xy2 = problem.goal
     return abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
 
+def manhattanHeuristicMultiGoal(position, problem, info={}):
+    """
+    Copy of Manhattan distance heuristic with handling for multiple goals.
+    """
+    DEBUG = True
+
+    results = []
+    xy1 = position
+
+    if DEBUG:
+        print "manhattanHeuristicMultiGoal handling problem: " + str(problem)
+
+    for xy2 in problem.goals:
+        result = abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
+        results.append(result)
+
+    return results
+
+def decoupledManhattanHeuristic(position, goal):
+    """
+    Copy of manhattanHeuristic with the difference of getting goal as a
+    parameter. However, in project 1 paper it was stated that heuristic
+    should take problem as a parameter.
+    """
+    xy1 = position
+    xy2 = goal
+    return abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
+
 def euclideanHeuristic(position, problem, info={}):
     "The Euclidean distance heuristic for a PositionSearchProblem"
     xy1 = position
