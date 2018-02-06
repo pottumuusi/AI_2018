@@ -120,6 +120,7 @@ class Search:
 
     def run(self):
         node = None
+        latestCoordinates = None
 
         while True:
             if self.DEBUG_STEP:
