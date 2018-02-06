@@ -340,7 +340,7 @@ class Search:
             cost = self.problem.getCostOfActions(route)
 
             if self.DEBUG_PRINTS:
-                print "Pushing coordinates" + str(coordinates) + " With cost: " + str(cost)
+                print "Pushing coordinates: " + str(coordinates) + " With cost: " + str(cost)
 
             self.unvisitedCoordinates.push(coordinates, cost)
         elif self.isAstarSearch():
@@ -352,7 +352,7 @@ class Search:
             self.unvisitedCoordinates.push(coordinates, cost)
         else:
             if self.DEBUG_PRINTS:
-                print "Pushing coordinates" + str(coordinates)
+                print "Pushing coordinates: " + str(coordinates)
             self.unvisitedCoordinates.push(coordinates)
 
         self.rawNodes[coordinates] = data
