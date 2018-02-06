@@ -82,6 +82,7 @@ class Search:
         from game import Directions
 
         global OPT_KEY_MULTIPLE_GOALS
+        global OPT_KEY_STR_GOAL
 
         self.DEBUG_STEP = False
         self.DEBUG_PRINTS = False
@@ -495,8 +496,14 @@ class Search:
         return self.ASTAR_TYPE == self.searchType
 
     def problemHasMultipleGoals(self):
+        return self.getOptionValue(OPT_KEY_MULTIPLE_GOALS)
+
+    def problemHasStrGoal(self):
+        return self.getOptionValue(OPT_KEY_STR_GOAL)
+
+    def getOptionValue(self, key):
         try:
-            return self.options[OPT_KEY_MULTIPLE_GOALS]
+            return self.options[key]
         except KeyError:
             return False
 
@@ -623,6 +630,14 @@ def isMultiGoalProblem(problem):
 
     return True
 
+def isStrGoalProblem(problem):
+    if isMultiGoalProblem(problem):
+        goal = problem.goals[0]
+    else:
+        goal = problem.goal
+
+    return str is type(goal)
+
 def aStarSearch(problem, heuristic=None):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
@@ -639,6 +654,9 @@ def aStarSearch(problem, heuristic=None):
     if isMultiGoalProblem(problem):
         heuristic = manhattanHeuristicMultiGoal
         options[OPT_KEY_MULTIPLE_GOALS] = True
+
+    if isStrGoalProblem(problem):
+        options[OPT_KEY_STR_GOAL] = True
 
     search = Search(problem, "astar", heuristic)
 
@@ -663,3 +681,4 @@ astar = aStarSearch
 ucs = uniformCostSearch
 
 OPT_KEY_MULTIPLE_GOALS = "multiple_goals"
+OPT_KEY_STR_GOAL = "str_goal"
