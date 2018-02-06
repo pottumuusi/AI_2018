@@ -73,7 +73,9 @@ def tinyMazeSearch(problem):
     return  [s, s, w, s, w, w, s, w]
 
 class Search:
-    def __init__(self, problem, searchType):
+    # If more parameters are needed for constructor do pass them in a dict
+    # which defaults to None.
+    def __init__(self, problem, searchType, heuristic=None):
         from util import Stack
         from util import Queue
         from util import PriorityQueue
@@ -91,21 +93,27 @@ class Search:
         self.DFS_TYPE = "dfs"
         self.BFS_TYPE = "bfs"
         self.UCS_TYPE = "ucs"
+        self.ASTAR_TYPE = "astar"
         self.EMPTY_NODE = (None, None, None)
 
         self.problem = problem
         self.searchType = searchType
+        self.heuristic = heuristic
 
         self.parents = {}
         self.finalCoordinates = None
         self.expandedCoordinates = {}
         self.rawNodes = {}
 
+        if self.isAstarSearch():
+            if None == self.heuristic:
+                raise Exception("No heuristic provided for A* search")
+
         if self.isDepthFirstSearch():
             self.unvisitedCoordinates = Stack()
         elif self.isBreadthFirstSearch():
             self.unvisitedCoordinates = Queue()
-        elif self.isUniformCostSearch():
+        elif self.isUniformCostSearch() or self.isAstarSearch():
             self.unvisitedCoordinates = InformativePriorityQueue()
         else:
             raise Exception("Unknown search type: " + searchType)
@@ -296,7 +304,7 @@ class Search:
     # the passed coordinates. Update node position in coordinates waiting to
     # be picked and node parent if cost is lower.
     def updateUnvisitedNode(self, data, parentCoordinates):
-        if not self.isUniformCostSearch():
+        if not (self.isUniformCostSearch() or self.isAstarSearch()):
             raise Exception("Unexpected search updating visited node")
 
         if self.DEBUG_PRINTS:
@@ -310,7 +318,11 @@ class Search:
         if self.DEBUG_PRINTS:
             print "Getting cost of actions for route: " + str(route)
 
-        cost = self.problem.getCostOfActions(route)
+        if self.isUniformCostSearch():
+            cost = self.problem.getCostOfActions(route)
+        elif self.isAstarSearch():
+            cost = self.calculateAstarCost(coordinates)
+
         wasChanged = self.unvisitedCoordinates.update(successorCoordinates, cost)
 
         if wasChanged:
@@ -330,12 +342,36 @@ class Search:
                 print "Pushing coordinates" + str(coordinates) + " With cost: " + str(cost)
 
             self.unvisitedCoordinates.push(coordinates, cost)
+        elif self.isAstarSearch():
+            cost = self.calculateAstarCost(coordinates)
+
+            if self.DEBUG_PRINTS:
+                print "Pushing coordinates: " + str(coordinates) + " With cost: " + str(cost)
+
+            self.unvisitedCoordinates.push(coordinates, cost)
         else:
             if self.DEBUG_PRINTS:
                 print "Pushing coordinates" + str(coordinates)
             self.unvisitedCoordinates.push(coordinates)
 
         self.rawNodes[coordinates] = data
+
+    def calculateAstarCost(self, coordinates):
+        cost = None
+
+        route = self.constructRoute(coordinates)
+        uniformCost = self.problem.getCostOfActions(route)
+        heuristicResult = self.heuristic(coordinates, self.problem)
+        greedyCost = heuristicResult
+        cost = uniformCost + greedyCost
+
+        if self.DEBUG_PRINTS:
+            print "Got greedyCost: " + str(greedyCost) + " uniformCost: " + str(uniformCost)
+
+        if None == cost:
+            raise Exception("Failed to calculate A* cost from coordinates: " + str(coordinates))
+
+        return cost
 
     def pickNextCoordinates(self):
         if self.DEBUG_PRINTS:
@@ -430,6 +466,9 @@ class Search:
 
     def isUniformCostSearch(self):
         return self.UCS_TYPE == self.searchType
+
+    def isAstarSearch(self):
+        return self.ASTAR_TYPE == self.searchType
 
     def parentSanityCheck(self, parent, direction, coordinates):
         if None == direction:
@@ -543,10 +582,26 @@ def nullHeuristic(state, problem=None):
     """
     return 0
 
-def aStarSearch(problem, heuristic=nullHeuristic):
+def aStarSearch(problem, heuristic=None):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    import time
+
+    search = Search(problem, "astar", heuristic)
+
+    startTime = time.time()
+    route = search.run()
+    stopTime = time.time()
+
+    finalCoordinates = search.getFinalCoordinates()
+    searchFinishBanner = getSearchFinishBanner(route, finalCoordinates, problem, stopTime - startTime)
+
+    print searchFinishBanner
+    latestRunFile = open('latest_run.txt', 'w')
+    latestRunFile.write(searchFinishBanner)
+
+    return route
 
 
 # Abbreviations
