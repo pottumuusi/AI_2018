@@ -658,7 +658,7 @@ def aStarSearch(problem, heuristic=None):
     if isStrGoalProblem(problem):
         options[OPT_KEY_STR_GOAL] = True
 
-    search = Search(problem, "astar", heuristic)
+    search = Search(problem, "astar", heuristic, options)
 
     startTime = time.time()
     route = search.run()
