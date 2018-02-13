@@ -91,6 +91,7 @@ class Search:
 
         self.COORDINATES_POSITION = 0
         self.DIRECTION_POSITION = 1
+        self.COST_POSITION = 2
         self.DFS_TYPE = "dfs"
         self.BFS_TYPE = "bfs"
         self.UCS_TYPE = "ucs"
@@ -197,7 +198,7 @@ class Search:
                 continue
             if self.isBreadthFirstSearch() and self.isAlreadyDiscovered(s):
                 continue
-            if self.isUniformCostSearch() and self.isAlreadyDiscovered(s):
+            if self.isSearchWithUpdate() and self.isAlreadyDiscovered(s):
                 # It is possible for uniform search to find a lower cost route
                 # to a node.
                 self.updateUnvisitedNode(s, coordinates)
@@ -326,7 +327,7 @@ class Search:
         if self.isUniformCostSearch():
             costs.append(self.problem.getCostOfActions(route))
         elif self.isAstarSearch():
-            costs = self.calculateAstarCost(coordinates)
+            costs = self.calculateAstarCost(successorCoordinates, data, route)
 
         for cost in costs:
             wasChanged = self.unvisitedCoordinates.update(successorCoordinates, cost)
@@ -349,7 +350,7 @@ class Search:
 
             self.unvisitedCoordinates.push(coordinates, cost)
         elif self.isAstarSearch():
-            costs = self.calculateAstarCost(coordinates)
+            costs = self.calculateAstarCost(coordinates, data)
 
             if self.DEBUG_PRINTS:
                 print "Pushing coordinates: " + str(coordinates) + " With costs: " + str(costs)
@@ -363,32 +364,79 @@ class Search:
 
         self.rawNodes[coordinates] = data
 
-    def calculateAstarCost(self, coordinates):
+    # Autograder had strings as goal states. For example Manhattan
+    # heuristic can't be used to calculate cost from strings.
+    # Nodes contain a value as a third item. Expect that this item
+    # is the number of hops needed to take to reach goal. In other
+    # words the values are interesting to greedy search part of A*.
+    def calculateAstarCost(self, coordinates, data, premadeRoute=None):
+        try:
+            costs = self.calculateAstarCostWithHeuristic(coordinates, premadeRoute)
+            if self.DEBUG_PRINTS:
+                print "Calculated A* costs: " + str(costs)
+            return costs
+        except TypeError:
+            costs = self.astarCostFromPredefinedGreedyCost(data, premadeRoute)
+            if self.DEBUG_PRINTS:
+                print "Calculated A* costs [predefined]: " + str(costs)
+            return costs
+
+        raise Exception("Could not calculate A* cost for" \
+                + " coordinates: " + str(coordinates) \
+                + " data:" + str(data) \
+                + " premadeRoute: " + str(premadeRoute))
+
+    def astarCostFromPredefinedGreedyCost(self, data, premadeRoute=None):
         costs = []
 
-        route = self.constructRoute(coordinates)
+        coordinates = self.extractCoordinates(data)
+
+        if None != premadeRoute:
+            route = premadeRoute
+        else:
+            route = self.constructRoute(coordinates)
+
+        predefinedCost = self.extractCost(data)
         uniformCost = self.problem.getCostOfActions(route)
 
-        if self.problemHasMultipleGoals():
-            costs = []
-            heuristicResult = self.heuristic(coordinates, self.problem)
+        if None == predefinedCost:
+            # Handle first node
+            predefinedCost = 0
 
+        costs.append(predefinedCost + uniformCost)
+
+        if self.DEBUG_PRINTS:
+            print "Got predefinedCost: " + str(predefinedCost) + " uniformCost: " + str(uniformCost)
+
+        self.astarCostSanityCheck(costs)
+
+        return costs
+
+    def calculateAstarCostWithHeuristic(self, coordinates, premadeRoute=None):
+        costs = []
+
+        if None != premadeRoute:
+            route = premadeRoute
+        else:
+            route = self.constructRoute(coordinates)
+
+        uniformCost = self.problem.getCostOfActions(route)
+        heuristicResult = self.heuristic(coordinates, self.problem)
+
+        if self.DEBUG_PRINTS:
+            print "HeuristicResult is: " + str(heuristicResult)
+
+        if self.problemHasMultipleGoals():
             for greedyCost in heuristicResult:
                 costs.append(greedyCost + uniformCost)
         else:
-            # If one goal, then list to return contains only one item.
-            heuristicResult = self.heuristic(coordinates, self.problem)
             greedyCost = heuristicResult
             costs.append(uniformCost + greedyCost)
 
         if self.DEBUG_PRINTS:
             print "Got greedyCost: " + str(greedyCost) + " uniformCost: " + str(uniformCost)
 
-        if [] == costs:
-            raise Exception("Failed to calculate A* cost from coordinates: " + str(coordinates))
-
-        if not isinstance(costs, list):
-            raise Exception("Ended up with non-list costs: " + str(costs))
+        self.astarCostSanityCheck(costs)
 
         return costs
 
@@ -456,6 +504,16 @@ class Search:
 
         raise Exception("Failed to extract direction from data: " + str(data))
 
+    def extractCost(self, data):
+        if self.isBareAutograderCoordinate(data):
+            return None # First state does not contain cost
+
+        dataLen = len(data)
+        if self.dataHasAutograderCost(data, dataLen):
+            return data[self.COST_POSITION]
+
+        raise Exception("Failed to extract cost from data: " + str(data))
+
     def getFinalCoordinates(self):
         return self.finalCoordinates
 
@@ -483,6 +541,9 @@ class Search:
     def dataHasAutograderDirection(self, data, dataLen):
         return dataLen > 1 and self.hasAutograderCoordinate(data)
 
+    def dataHasAutograderCost(self, data, dataLen):
+        return dataLen > 2 and self.hasAutograderCoordinate(data)
+
     def isDepthFirstSearch(self):
         return self.DFS_TYPE == self.searchType
 
@@ -494,6 +555,9 @@ class Search:
 
     def isAstarSearch(self):
         return self.ASTAR_TYPE == self.searchType
+
+    def isSearchWithUpdate(self):
+        return self.isUniformCostSearch() or self.isAstarSearch()
 
     def problemHasMultipleGoals(self):
         return self.getOptionValue(OPT_KEY_MULTIPLE_GOALS)
@@ -513,6 +577,15 @@ class Search:
 
         if None == coordinates:
             raise Exception("Could not extract coordinates from parent: " + str(parent))
+
+    def astarCostSanityCheck(self, costs):
+        if [] == costs:
+            raise Exception("Failed to calculate A* cost from coordinates: " \
+                    + str(coordinates) + " and premadeRoute: " \
+                    + str(premadeRoute))
+
+        if not isinstance(costs, list):
+            raise Exception("Ended up with non-list costs: " + str(costs))
 
     def routeDebugPrint(self, route):
         print "---== Printing route ==---"
@@ -648,12 +721,11 @@ def aStarSearch(problem, heuristic=None):
 
     options = {}
 
-    if None == heuristic:
-        heuristic = manhattanHeuristic
-
-    if isMultiGoalProblem(problem):
+    if None == heuristic and isMultiGoalProblem(problem):
         heuristic = manhattanHeuristicMultiGoal
         options[OPT_KEY_MULTIPLE_GOALS] = True
+    elif None == heuristic:
+        heuristic = manhattanHeuristic
 
     if isStrGoalProblem(problem):
         options[OPT_KEY_STR_GOAL] = True
