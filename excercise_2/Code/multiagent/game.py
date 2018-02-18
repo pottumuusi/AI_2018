@@ -245,6 +245,12 @@ class Grid:
         bits.append(currentInt)
         return tuple(bits)
 
+    def getHeight(self):
+        return self.height
+
+    def getWidth(self):
+        return self.width
+
     def _cellIndexToPosition(self, index):
         x = index / self.height
         y = index % self.height

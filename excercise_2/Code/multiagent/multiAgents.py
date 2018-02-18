@@ -28,6 +28,32 @@ class ReflexAgent(Agent):
       headers.
     """
 
+    def __init__(self):
+        self.DEBUG_PRINTS = False
+        self.DEBUG_STEP = False
+        self.RESULT_PRINTS = False
+
+        self.PLAYER_POSITION_KEY = "player_position"
+        self.GHOST_POSITIONS_KEY = "ghost_positions"
+        self.FOOD_POSITIONS_KEY = "food_positions"
+        self.ACTION_KEY = "action"
+
+        self.GHOST_DISTANCE_WEIGHT = 0.15
+        self.FOOD_DISTANCE_WEIGHT = 0.85
+
+        self.MAX_SINGLE_BASE_SCORE = pow(1, -1) * 10
+        self.WORST_SCORE_MULT = self.MAX_SINGLE_BASE_SCORE * 4
+        self.SECOND_WORST_SCORE_MULT = self.MAX_SINGLE_BASE_SCORE * 2
+        self.THIRD_WORST_SCORE_MULT = self.MAX_SINGLE_BASE_SCORE * 0.2
+
+        self.currentGameState = None
+        self.successorGameState = None
+        self.remainingFood = None
+
+        if self.DEBUG_PRINTS:
+            print "self.WORST_SCORE_MULT is:" + str(self.WORST_SCORE_MULT)
+            print "self.SECOND_WORST_SCORE_MULT is:" + str(self.SECOND_WORST_SCORE_MULT)
+            print "self.THIRD_WORST_SCORE_MULT is:" + str(self.THIRD_WORST_SCORE_MULT)
 
     def getAction(self, gameState):
         """
@@ -49,6 +75,11 @@ class ReflexAgent(Agent):
 
         "Add more of your code here if you want to"
 
+        if self.RESULT_PRINTS:
+            print ""
+            print "=== Direction picked ==="
+            print ""
+
         return legalMoves[chosenIndex]
 
     def evaluationFunction(self, currentGameState, action):
@@ -66,15 +97,196 @@ class ReflexAgent(Agent):
         Print out these variables to see what you're getting, then combine them
         to create a masterful evaluation function.
         """
+        # Original usage examples
+        #
         # Useful information you can extract from a GameState (pacman.py)
-        successorGameState = currentGameState.generatePacmanSuccessor(action)
-        newPos = successorGameState.getPacmanPosition()
-        newFood = successorGameState.getFood()
-        newGhostStates = successorGameState.getGhostStates()
-        newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
+        # successorGameState = currentGameState.generatePacmanSuccessor(action)
+        # newPos = successorGameState.getPacmanPosition()
+        # newFood = successorGameState.getFood()
+        # newGhostStates = successorGameState.getGhostStates()
+        # newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
+        # score = successorGameState.getScore()
+        #
+        # Original usage examples
 
         "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+
+        successorGameState = currentGameState.generatePacmanSuccessor(action)
+
+        self.currentGameState = currentGameState
+        self.successorGameState = successorGameState
+
+        availableFood = self.currentGameState.getFood()
+        newPos = successorGameState.getPacmanPosition()
+        ghostPositions = currentGameState.getGhostPositions()
+        foodPositions = self.extractFoodPositions(availableFood, newPos)
+
+        stateInformation = {
+            self.PLAYER_POSITION_KEY : newPos,
+            self.GHOST_POSITIONS_KEY : ghostPositions,
+            self.FOOD_POSITIONS_KEY : foodPositions,
+            self.ACTION_KEY : action
+        }
+
+        score = self.calculateScore(stateInformation)
+
+        if self.RESULT_PRINTS:
+            print "=== printing evaluation variables ==="
+            print "action: " + str(action)
+            print "newPos: " + str(newPos)
+            print "score: " + str(score)
+            print "=== done printing evaluation variables ==="
+
+        if self.DEBUG_PRINTS:
+            print "successorGameState: " + str(successorGameState)
+            print "newFood: " + str(newFood)
+            print "newGhostStates: " + str(newGhostStates)
+            print "newScaredTimes: " + str(newScaredTimes)
+
+        if self.DEBUG_STEP:
+            raw_input()
+
+        return score
+
+    def calculateScore(self, info):
+        distancesToGhosts = []
+        distancesToFood = []
+        playerPos = info[self.PLAYER_POSITION_KEY]
+        ghostPositions = info[self.GHOST_POSITIONS_KEY]
+        foodPositions = info[self.FOOD_POSITIONS_KEY]
+        action = info[self.ACTION_KEY]
+
+        if self.DEBUG_PRINTS:
+            print "ghostPositions: " + str(ghostPositions)
+            print "foodPositions: " + str(foodPositions)
+
+        distancesToFood = self.fillDistances(playerPos, foodPositions)
+        distancesToGhosts = self.fillDistances(playerPos, ghostPositions)
+        score = self.calculateScoreFromDistances(distancesToFood, distancesToGhosts)
+
+        return score
+
+    def calculateScoreFromDistances(self, distancesToFood, distancesToGhosts):
+        foodScore = 0
+        ghostScore = 0
+
+        if self.DEBUG_PRINTS:
+            self.distanceDebugPrints()
+
+        for dist in distancesToFood:
+            calculatedScore = self.calculateFoodScore(dist)
+            foodScore = foodScore + calculatedScore
+            if self.DEBUG_PRINTS:
+                foodScoreDebugPrint(foodScore, dist, calculatedScore)
+
+        for dist in distancesToGhosts:
+            ghostScore = ghostScore + self.calculateGhostScore(dist)
+
+        foodScore = foodScore * self.FOOD_DISTANCE_WEIGHT
+        ghostScore = ghostScore * self.GHOST_DISTANCE_WEIGHT
+        totalScore = foodScore + ghostScore
+
+        if self.RESULT_PRINTS:
+            print "=== printing evaluation variables ==="
+            print "Food score: " + str(foodScore)
+            print "Ghost score: " + str(ghostScore)
+            print "=== done printing evaluation variables ==="
+
+        return totalScore
+
+    def calculateFoodScore(self, distToFood):
+        score = self.baseScoreFromDistance(distToFood)
+
+        # The less food the more it weights in decision making
+        # Supposedly this still rarely causes pacman to die
+        score = score / self.getRemainingFood()
+        score = score * 100
+
+        return score
+
+    def calculateGhostScore(self, distToGhost):
+        if self.DEBUG_PRINTS:
+            print "calculateGhostScore, distToGhost is: " + str(distToGhost)
+
+        # Calculate positive values when quite far from ghosts.
+        if distToGhost > 2:
+            score = distToGhost
+            score = score * self.getRemainingFood() # Stay farther from ghosts when more food left
+            score = score / 100
+            return score
+
+        score = self.baseScoreFromDistance(distToGhost)
+
+        if 0 == distToGhost:
+            score = score * self.WORST_SCORE_MULT
+        elif 1 == distToGhost:
+            score = score * self.SECOND_WORST_SCORE_MULT
+        elif 2 == distToGhost:
+            score = score * self.THIRD_WORST_SCORE_MULT
+
+        score = score * 100
+        score = score * -1
+
+        return score
+
+    def baseScoreFromDistance(self, distance):
+        score = None
+
+        if 0 == distance:
+            score = self.MAX_SINGLE_BASE_SCORE
+        else:
+            score = pow(distance, -1) # Closer distance gives exponentially larger score
+
+        return score
+
+    def fillDistances(self, playerPos, positions):
+        distances = []
+
+        for pos in positions:
+            dist = manhattanDistance(playerPos, pos)
+            if self.DEBUG_PRINTS:
+                print "Distance from " + str(playerPos) + " to " + str(pos) + " is: " + str(dist)
+            distances.append(dist)
+
+        return distances
+
+    def extractFoodPositions(self, food, newPos):
+        from game import Grid
+
+        foodPositions = []
+
+        if not isinstance(food, Grid):
+            raise Exception("Trying to extract food positions from a non-Grid object")
+
+        for y in range(0, food.getHeight()):
+            for x in range(0, food.getWidth()):
+                if (True == food[x][y]):
+                    foodPositions.append((x, y))
+
+        self.setRemainingFood(len(foodPositions))
+
+        return foodPositions
+
+    def setRemainingFood(self, remaining):
+        self.remainingFood = remaining
+
+    def getRemainingFood(self):
+        return self.remainingFood
+
+    def foodScoreDebugPrint(self, foodScore, dist, calculatedScore):
+        print "foodScore: " + str(foodScore) + " dist: " + str(dist) \
+                + " calculatedScore: " + str(calculatedScore)
+
+    def distanceDebugPrints(self, distancesToGhosts, distancesToFood):
+        print "printing distances to ghosts:"
+        for dist in distancesToGhosts:
+            print str(dist)
+        print "done printing distances to ghosts"
+
+        print "printing distances to food:"
+        for dist in distancesToFood:
+            print str(dist)
+        print "done printing distances to food"
 
 def scoreEvaluationFunction(currentGameState):
     """
