@@ -18,7 +18,7 @@ import random, util
 
 from game import Agent
 
-GLOBAL_DEBUG = True
+GLOBAL_DEBUG = False
 
 class ReflexAgent(Agent):
     """
@@ -336,9 +336,15 @@ class MultiAgentSearchAgent(Agent):
         self.PARENT_STATE_POS = 0
         self.PARENT_ACTION_POS = 1
 
+        self.SEARCH_STATE_POS = 0
+        self.SEARCH_MINMAX_POS = 1
+
         self.PACMAN_LAYER_TURN = 0
         self.GHOST_LAYER_TURN = 1
         self.layerTurn = self.PACMAN_LAYER_TURN
+
+        self.MAX_TAG = "max"
+        self.MIN_TAG = "min"
 
         self.DEBUG_PRINTS = True
 
@@ -407,11 +413,19 @@ class MinimaxAgent(MultiAgentSearchAgent):
             #     print str(self.searchTree.pop())
             # print "done printing stack again"
 
-        minimaxValue = self.calculateMinimaxValue()
-        if self.DEBUG_PRINTS:
-            print "minimaxValue is: " + str(minimaxValue)
+        minimaxDecision = self.calculateMinimaxValue()
+        # if self.DEBUG_PRINTS:
+        #     print "minimaxValue is: " + str(minimaxValue)
 
+        scoreKeys = self.scores.keys()
+        selectedDirectionKeys = self.selectedDirections.keys()
+        print "scoreKeys are: " + str(scoreKeys)
 
+        for key in scoreKeys:
+            print "For state " + str(key) + ", score is: " + str(self.scores[key])
+
+        for key in selectedDirectionKeys:
+            print "For state " + str(key) + ", direction is: " + str(self.selectedDirections[key])
 
         # util.raiseNotDefined()
 
@@ -578,15 +592,32 @@ class MinimaxAgent(MultiAgentSearchAgent):
         possibleNextStates = self.getPossibleNextStates(gameState, actions, agentIndex)
 
         for state in possibleNextStates:
-            self.searchTree.push(state)
+            if self.PACMAN_INDEX == agentIndex:
+                tag = self.MAX_TAG
+            else:
+                tag = self.MIN_TAG
+
+            self.searchTree.push(self.makeSearchNode(state, tag))
 
         return possibleNextStates
+
+    def makeSearchNode(self, state, tag):
+        return (state, tag)
 
     def calculateMinimaxValue(self):
         # Stack is ordered so that states of last layer are popped first,
         # then states of second last layer etc.
+
         while not self.searchTree.isEmpty():
-            state = self.searchTree.pop()
+            searchNode = self.searchTree.pop()
+            state = searchNode[self.SEARCH_STATE_POS]
+
+            if self.MAX_TAG == searchNode[self.SEARCH_MINMAX_POS]:
+                maxTurn = True
+            elif self.MIN_TAG == searchNode[self.SEARCH_MINMAX_POS]:
+                maxTurn = False
+            else:
+                raise Exception("Unrecognized search node minmax pos value")
 
             if self.DEBUG_PRINTS:
                 print "In Minimax value calculation handling next state: " + str(state)
@@ -601,21 +632,31 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
             try:
                 parentScore = self.scores[parent[self.PARENT_STATE_POS]]
-                if stateScore > parentScore:
+                if maxTurn and (stateScore > parentScore):
                     self.scores[parent[self.PARENT_STATE_POS]] = stateScore
                     self.selectedDirections[parent[self.PARENT_STATE_POS]] = parent[self.PARENT_ACTION_POS]
                     if self.DEBUG_PRINTS:
                         print "For state " + str(parent[self.PARENT_STATE_POS]) \
-                                + ", set score: " + str(stateScore) \
-                                + ", set selectedDirection: " + str(parent[self.PARENT_ACTION_POS])
+                                + "\n\tset score: " + str(stateScore) \
+                                + "\n\tset selectedDirection: " + str(parent[self.PARENT_ACTION_POS])
+                elif (not maxTurn) and (stateScore < parentScore):
+                    self.scores[parent[self.PARENT_STATE_POS]] = stateScore
+                    self.selectedDirections[parent[self.PARENT_STATE_POS]] = parent[self.PARENT_ACTION_POS]
+                    if self.DEBUG_PRINTS:
+                        print "For state " + str(parent[self.PARENT_STATE_POS]) \
+                                + "\n\tset score: " + str(stateScore) \
+                                + "\n\tset selectedDirection: " + str(parent[self.PARENT_ACTION_POS])
+                else:
+                    if self.DEBUG_PRINTS:
+                        print "\tmaxTurn: " + str(maxTurn) + ", stateScore " + str(stateScore) + " not change in parent score " + str(parentScore)
             except KeyError:
                 # Give current value to parent in case none is present.
                 self.scores[parent[self.PARENT_STATE_POS]] = stateScore
                 self.selectedDirections[parent[self.PARENT_STATE_POS]] = parent[self.PARENT_ACTION_POS]
                 if self.DEBUG_PRINTS:
                     print "For state " + str(parent[self.PARENT_STATE_POS]) \
-                            + ", set score: " + str(stateScore) \
-                            + ", set selectedDirection: " + str(parent[self.PARENT_ACTION_POS])
+                            + "\n\t set score: " + str(stateScore) \
+                            + "\n\t set selectedDirection: " + str(parent[self.PARENT_ACTION_POS])
 
         # self.searchTree
         # Score is calculated the first time when max depth is found
