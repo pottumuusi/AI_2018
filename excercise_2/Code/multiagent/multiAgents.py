@@ -18,6 +18,8 @@ import random, util
 
 from game import Agent
 
+GLOBAL_DEBUG = True
+
 class ReflexAgent(Agent):
     """
       A reflex agent chooses an action at each choice point by examining
@@ -296,6 +298,10 @@ def scoreEvaluationFunction(currentGameState):
       This evaluation function is meant for use with adversarial search agents
       (not reflex agents).
     """
+    
+    if GLOBAL_DEBUG:
+        print "scoreEvaluation function running"
+
     return currentGameState.getScore()
 
 class MultiAgentSearchAgent(Agent):
@@ -327,9 +333,21 @@ class MultiAgentSearchAgent(Agent):
         self.PAIR_STATE_INDEX = 0
         self.PAIR_SCORE_INDEX = 1
 
+        self.PARENT_STATE_POS = 0
+        self.PARENT_ACTION_POS = 1
+
+        self.PACMAN_LAYER_TURN = 0
+        self.GHOST_LAYER_TURN = 1
+        self.layerTurn = self.PACMAN_LAYER_TURN
+
         self.DEBUG_PRINTS = True
 
         self.searchTree = Stack()
+
+        # self.alreadyDiscovered = {}
+        self.parents = {}
+        self.scores = {}
+        self.selectedDirections = {}
 
 class MinimaxAgent(MultiAgentSearchAgent):
     """
@@ -362,25 +380,47 @@ class MinimaxAgent(MultiAgentSearchAgent):
             print "gameState is: " + str(gameState)
             print "evaluationFunction is: " + str(self.evaluationFunction)
             print "ghostAmount is: " + str(self.getGhostAmount())
+            try:
+                print "rootGameState getScore gives: " + str(self.rootGameState.getScore())
+            except:
+                print "rootGameState getScore resulted in exception"
 
         # searchTree = self.constructSearchTree()
         self.constructSearchTree()
-        minimaxValue = self.calculateMinimaxValue()
 
         if self.DEBUG_PRINTS:
-
-            print "minimaxValue is: " + str(minimaxValue)
+            from util import Stack
+            restoreStack = Stack()
 
             print "printing Stack content"
             while not self.searchTree.isEmpty():
-                print str(self.searchTree.pop())
+                val = self.searchTree.pop()
+                restoreStack.push(val)
+                print str(val)
+
+            while not restoreStack.isEmpty():
+                self.searchTree.push(restoreStack.pop())
             print "done printing Stack content"
 
-        util.raiseNotDefined()
+            # print "printing stack again"
+            # while not self.searchTree.isEmpty():
+            #     print str(self.searchTree.pop())
+            # print "done printing stack again"
+
+        minimaxValue = self.calculateMinimaxValue()
+        if self.DEBUG_PRINTS:
+            print "minimaxValue is: " + str(minimaxValue)
+
+
+
+        # util.raiseNotDefined()
+
+        # TODO replace with sane value when search working
+        return self.rootGameState.getLegalActions(self.PACMAN_INDEX)[2]
 
     def constructSearchTree(self):
         maxDepth = self.getDepth()
-        depth = 0
+        depth = 1
 
         if self.DEBUG_PRINTS:
             print "constructSearchTree, depth is: " + str(depth)
@@ -397,15 +437,20 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
         while depth <= maxDepth:
             if self.DEBUG_PRINTS:
-                print "Creating layers on depth: " + str(depth)
+                print "\n===== Creating layers on depth: " + str(depth) + " ======"
                 print "nextRoundStates to pass are: " + str(nextRoundStates)
 
             nextRoundStates = self.createLayersForRound(nextRoundStates)
+            # nextRoundStates = self.createAlternatingTreeLayerForRound(nextRoundStates)
 
             # pacmanActions = self.getLegalPacmanActions(gameState)
             # pacmanPossibleStates = self.getPossibleNextStates(gameState, pacmanActions, self.PACMAN_INDEX)
 
             depth = depth + 1 # TODO put to correct place
+
+        if self.DEBUG_PRINTS:
+            print "===== Max depth reached ====="
+
 
 #            # TODO need to assign parents for states added to tree
 #            for pacState in pacmanPossibleStates:
@@ -418,6 +463,42 @@ class MinimaxAgent(MultiAgentSearchAgent):
 #                    ghostStates = self.getPossibleNextStates(gameState, singleGhostActions, ghostIndex + 1)
 #                    print "for ghost [" + str(ghostIndex) + "] got ghostStatuses: " + str(ghostStates)
 
+    # Alternate between creating (pacman / max) and (ghost / min) layers on
+    # calls.
+    # def createAlternatingTreeLayerForRound(self, roundStates):
+    #     ghostAmount = self.getGhostAmount()
+    #     nextRoundStates = []
+    #     newStates = [] 
+    #     if self.DEBUG_PRINTS:
+    #         print "createAlternatingLayerForRound, roundStates is: " + str(roundStates)
+
+    #     if self.layerTurn == self.PACMAN_LAYER_TURN:
+    #         if self.DEBUG_PRINTS:
+    #             print "Creating pacman layer"
+    #         for state in roundStates:
+    #             if self.DEBUG_PRINTS:
+    #                 print "Handling state " + str(state) + " of roundStates"
+    #             # newStates = newStates + self.createTreeLayerForAgent(state, self.PACMAN_INDEX)
+    #             nextRoundStates = nextRoundStates + self.createTreeLayerForAgent(state, self.PACMAN_INDEX)
+    #         if self.DEBUG_PRINTS:
+    #             print "Done creating pacman layer"
+
+    #         self.layerTurn = self.GHOST_LAYER_TURN
+    #     else:
+    #         if self.DEBUG_PRINTS:
+    #             print "Creating ghost layers"
+    #         for ghostNum in range(0, ghostAmount):
+    #             print "Creating layer for ghostNum: " + str(ghostNum)
+    #             # for state in newStates:
+    #             for state in roundStates:
+    #                 nextRoundStates = nextRoundStates + self.createTreeLayerForAgent(state, ghostNum + 1)
+    #         if self.DEBUG_PRINTS:
+    #             print "Done creating ghost layers"
+
+    #         self.layerTurn = self.PACMAN_LAYER_TURN
+
+    #     return nextRoundStates
+
     def createLayersForRound(self, roundStates):
         ghostAmount = self.getGhostAmount()
         nextRoundStates = []
@@ -426,16 +507,73 @@ class MinimaxAgent(MultiAgentSearchAgent):
         if self.DEBUG_PRINTS:
             print "createLayersForRound, roundStates is: " + str(roundStates)
 
+        if self.DEBUG_PRINTS:
+            print "Creating pacman layer"
         for state in roundStates:
+            if self.DEBUG_PRINTS:
+                print "Handling state " + str(state) + " of roundStates"
             newStates = newStates + self.createTreeLayerForAgent(state, self.PACMAN_INDEX)
+        if self.DEBUG_PRINTS:
+            print "Done creating pacman layer"
 
+        if [] == newStates and self.DEBUG_PRINTS:
+            if self.DEBUG_PRINTS:
+                print "===== Supposedly was layer with leaf nodes. Ending early ====="
+            return newStates
+
+        if self.DEBUG_PRINTS:
+            print "Creating ghost layers"
         for ghostNum in range(0, ghostAmount):
+            print "Creating layer for ghostNum: " + str(ghostNum)
             for state in newStates:
                 nextRoundStates = nextRoundStates + self.createTreeLayerForAgent(state, ghostNum + 1)
+        if self.DEBUG_PRINTS:
+            print "Done creating ghost layers"
+            if [] == nextRoundStates and self.DEBUG_PRINTS:
+                print "===== Supposedly was layer with leaf nodes ====="
+
+            # try:
+            #     # It looks like states which have pacman in same position as
+            #     # before can have different hash. Keeping track of already
+            #     # discovered states when creating the tree seems to be the
+            #     # wrong thing to do.
+            #     if True == self.alreadyDiscovered[state]:
+            #         if self.DEBUG_PRINTS:
+            #             print "Already discovered"
+            #         pass
+            # except KeyError:
+            #     self.alreadyDiscovered[state] = True
+            #     # newStates + self.createTreeLayerForAgent(state, self.PACMAN_INDEX)
+
+            # newStates = newStates + self.createTreeLayerForAgent(state, self.PACMAN_INDEX)
+            # for newState in newStates:
+            #     try:
+            #         if True == self.alreadyDiscovered[newState]:
+            #             if self.DEBUG_PRINTS:
+            #                 print "Already discovered"
+            #             pass
+            #     except KeyError:
+            #         self.alreadyDiscovered[newState] = True
+            #         newStates + self.createTreeLayerForAgent(state, self.PACMAN_INDEX)
+            #         # nextRoundStates.append(newState)
+
+
+        # Return states which are possible next pacman states. They will be
+        # used next round to get the next possible moves.
+        # When previously returned ghost positions which were used to get
+        # pacman positions, empty actions were returned by getLegalActions.
+        # Makes sense as these possible moves for ghosts are far from pacman.
+        # Moving to them would be teleporting.
+        # return newStates
 
         return nextRoundStates
 
     def createTreeLayerForAgent(self, gameState, agentIndex):
+        if self.DEBUG_PRINTS:
+            print "Creating tree layer for agent with " \
+                + "gameState: " + str(gameState) \
+                + ", agentIndex: " + str(agentIndex)
+
         actions = self.getLegalAgentActions(gameState, agentIndex)
         possibleNextStates = self.getPossibleNextStates(gameState, actions, agentIndex)
 
@@ -444,8 +582,42 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
         return possibleNextStates
 
-    # NOTE will not use this function if discovery and score calculation is done at the same time
     def calculateMinimaxValue(self):
+        # Stack is ordered so that states of last layer are popped first,
+        # then states of second last layer etc.
+        while not self.searchTree.isEmpty():
+            state = self.searchTree.pop()
+
+            if self.DEBUG_PRINTS:
+                print "In Minimax value calculation handling next state: " + str(state)
+
+            parent = self.parents[state]
+
+            # Will cause exception if not leaf node
+            try:
+                stateScore = self.evaluationFunction(state)
+            except Exception:
+                stateScore = self.scores[state]
+
+            try:
+                parentScore = self.scores[parent[self.PARENT_STATE_POS]]
+                if stateScore > parentScore:
+                    self.scores[parent[self.PARENT_STATE_POS]] = stateScore
+                    self.selectedDirections[parent[self.PARENT_STATE_POS]] = parent[self.PARENT_ACTION_POS]
+                    if self.DEBUG_PRINTS:
+                        print "For state " + str(parent[self.PARENT_STATE_POS]) \
+                                + ", set score: " + str(stateScore) \
+                                + ", set selectedDirection: " + str(parent[self.PARENT_ACTION_POS])
+            except KeyError:
+                # Give current value to parent in case none is present.
+                self.scores[parent[self.PARENT_STATE_POS]] = stateScore
+                self.selectedDirections[parent[self.PARENT_STATE_POS]] = parent[self.PARENT_ACTION_POS]
+                if self.DEBUG_PRINTS:
+                    print "For state " + str(parent[self.PARENT_STATE_POS]) \
+                            + ", set score: " + str(stateScore) \
+                            + ", set selectedDirection: " + str(parent[self.PARENT_ACTION_POS])
+
+        # self.searchTree
         # Score is calculated the first time when max depth is found
 
         # pacmanStateScores = self.getStateScores(pacmanPossibleStates)
@@ -481,21 +653,28 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
         return allLegalActions
 
-    def getPossibleNextGhostStates(self, actions, gameState):
-        nextStatuses
-        return 
+    # def getPossibleNextGhostStates(self, actions, gameState):
+    #     nextStatuses
+    #     return
 
     def getLegalPacmanActions(self, gameState):
         return gameState.getLegalActions(self.PACMAN_INDEX)
 
     def getLegalAgentActions(self, gameState, index):
-        return gameState.getLegalActions(index)
+        actions = gameState.getLegalActions(index)
+
+        if self.DEBUG_PRINTS:
+            print "Got actions: " + str(actions)
+
+        return actions
 
     def getPossibleNextStates(self, gameState, actions, index):
         nextStates = []
 
         for a in actions:
             state = gameState.generateSuccessor(index, a)
+            self.parents[state] = (gameState, a)
+            print "For action " + str(a) + " got successor: " + str(state)
             nextStates.append(state)
 
         return nextStates
