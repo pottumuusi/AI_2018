@@ -318,6 +318,13 @@ class MultiAgentSearchAgent(Agent):
         self.evaluationFunction = util.lookup(evalFn, globals())
         self.depth = int(depth)
 
+        self.gameState = None
+        self.PACMAN_INDEX = 0
+        self.FIRST_GHOST_INDEX = 1
+
+        self.PAIR_STATE_INDEX = 0
+        self.PAIR_SCORE_INDEX = 1
+
 class MinimaxAgent(MultiAgentSearchAgent):
     """
       Your minimax agent (question 2)
@@ -341,7 +348,85 @@ class MinimaxAgent(MultiAgentSearchAgent):
             Returns the total number of agents in the game
         """
         "*** YOUR CODE HERE ***"
+
+        print "self.depth is: " + str(self.depth)
+        print "gameState is: " + str(gameState)
+        self.gameState = gameState
+
+        evalFunction = self.evaluationFunction
+        ghostAmount = self.gameState.getNumAgents() - 1
+
+        pacmanActions = self.getLegalPacmanActions()
+        ghostActions = self.getLegalGhostActions(ghostAmount)
+
+
+        pacmanPossibleStates = self.getPossibleNextPacmanStates(pacmanActions)
+
+        # TODO Instead of getting scores while discovering states, the search
+        # tree needs to be constructed first. Then scores are selected
+        # starting from leaves and traversing tree to the direction of root.
+        pacmanStateScores = self.getStateScores(pacmanPossibleStates)
+        pacmanStateScorePairs = self.makeScorePairs(pacmanPossibleStates, pacmanStateScores)
+
+        print "evalFunction is: " + str(evalFunction)
+        print "ghostAmount is: " + str(ghostAmount)
+
+        print "ghostActions is: " + str(ghostActions)
+        print "pacmanActions is: " + str(pacmanActions)
+
+        print "pacmanPossibleStates is: " + str(pacmanPossibleStates)
+        print "pacmanStateScores is: " + str(pacmanStateScores)
+        print "pacmanStateScorePairs is: " + str(pacmanStateScorePairs)
+
         util.raiseNotDefined()
+
+    def getLegalGhostActions(self, ghostAmount):
+        allLegalActions = []
+
+        print "getting legal ghost actions, ghost amount is: " + str(ghostAmount)
+
+        for i in range(self.FIRST_GHOST_INDEX, self.FIRST_GHOST_INDEX + ghostAmount):
+            legalActions = self.gameState.getLegalActions(i)
+            allLegalActions.append(legalActions)
+
+        self.gameState.getLegalActions()
+
+        return allLegalActions
+
+    def getLegalPacmanActions(self):
+        return self.gameState.getLegalActions(self.PACMAN_INDEX)
+
+    def getPossibleNextPacmanStates(self, actions):
+        nextStates = []
+
+        for act in actions:
+            state = self.gameState.generateSuccessor(self.PACMAN_INDEX, act)
+            nextStates.append(state)
+
+        return nextStates
+
+    def getStateScores(self, states):
+        scores = []
+
+        for s in states:
+            score = self.evaluationFunction(s)
+            scores.append(score)
+
+        return scores
+
+    def makeScorePairs(self, states, scores):
+        pairs = []
+
+        if len(states) != len(scores):
+            raise Exception("Need equal amount of states and scores to make pairs")
+
+        for i in range(0, len(states)):
+            pair = ()
+            pair[self.PAIR_STATE_INDEX] = states[i]
+            pair[self.PAIR_SCORE_INDEX] = score[i]
+            pairs.append(pair)
+
+        return pairs
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
