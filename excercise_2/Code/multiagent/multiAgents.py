@@ -314,16 +314,22 @@ class MultiAgentSearchAgent(Agent):
     """
 
     def __init__(self, evalFn = 'scoreEvaluationFunction', depth = '2'):
+        from util import Stack
+
         self.index = 0 # Pacman is always agent index 0
         self.evaluationFunction = util.lookup(evalFn, globals())
         self.depth = int(depth)
 
-        self.gameState = None
+        self.rootGameState = None
         self.PACMAN_INDEX = 0
         self.FIRST_GHOST_INDEX = 1
 
         self.PAIR_STATE_INDEX = 0
         self.PAIR_SCORE_INDEX = 1
+
+        self.DEBUG_PRINTS = True
+
+        self.searchTree = Stack()
 
 class MinimaxAgent(MultiAgentSearchAgent):
     """
@@ -349,70 +355,103 @@ class MinimaxAgent(MultiAgentSearchAgent):
         """
         "*** YOUR CODE HERE ***"
 
-        print "self.depth is: " + str(self.depth)
-        print "gameState is: " + str(gameState)
-        self.gameState = gameState
+        self.rootGameState = gameState
 
-        evalFunction = self.evaluationFunction
-        ghostAmount = self.gameState.getNumAgents() - 1
+        if self.DEBUG_PRINTS:
+            print "self.depth is: " + str(self.depth)
+            print "gameState is: " + str(gameState)
+            print "evaluationFunction is: " + str(self.evaluationFunction)
+            print "ghostAmount is: " + str(self.getGhostAmount())
 
-        pacmanActions = self.getLegalPacmanActions()
-        ghostActions = self.getLegalGhostActions(ghostAmount)
+        # searchTree = self.constructSearchTree()
+        self.constructSearchTree()
+        minimaxValue = self.calculateMinimaxValue()
 
+        if self.DEBUG_PRINTS:
 
-        pacmanPossibleStates = self.getPossibleNextPacmanStates(pacmanActions)
+            print "minimaxValue is: " + str(minimaxValue)
 
-        # TODO Instead of getting scores while discovering states, the search
-        # tree needs to be constructed first. Then scores are selected
-        # starting from leaves and traversing tree to the direction of root.
-        pacmanStateScores = self.getStateScores(pacmanPossibleStates)
-        pacmanStateScorePairs = self.makeScorePairs(pacmanPossibleStates, pacmanStateScores)
-
-        print "evalFunction is: " + str(evalFunction)
-        print "ghostAmount is: " + str(ghostAmount)
-
-        print "ghostActions is: " + str(ghostActions)
-        print "pacmanActions is: " + str(pacmanActions)
-
-        print "pacmanPossibleStates is: " + str(pacmanPossibleStates)
-        print "pacmanStateScores is: " + str(pacmanStateScores)
-        print "pacmanStateScorePairs is: " + str(pacmanStateScorePairs)
+            print "printing Stack content"
+            while not self.searchTree.isEmpty():
+                print str(self.searchTree.pop())
+            print "done printing Stack content"
 
         util.raiseNotDefined()
 
-    def getLegalGhostActions(self, ghostAmount):
-        allLegalActions = []
+    def constructSearchTree(self):
+        maxDepth = self.getDepth()
+        depth = 0
 
-        print "getting legal ghost actions, ghost amount is: " + str(ghostAmount)
+        if self.DEBUG_PRINTS:
+            print "constructSearchTree, depth is: " + str(depth)
 
-        for i in range(self.FIRST_GHOST_INDEX, self.FIRST_GHOST_INDEX + ghostAmount):
-            legalActions = self.gameState.getLegalActions(i)
-            allLegalActions.append(legalActions)
+        nextRoundStates = []
+        nextRoundStates.append(self.rootGameState)
 
-        self.gameState.getLegalActions()
+        # print "ghostActions is: " + str(ghostActions)
+        # print "pacmanActions is: " + str(pacmanActions)
 
-        return allLegalActions
+        # print "pacmanPossibleStates is: " + str(pacmanPossibleStates)
+        # print "pacmanStateScores is: " + str(pacmanStateScores)
+        # print "pacmanStateScorePairs is: " + str(pacmanStateScorePairs)
 
-    def getLegalPacmanActions(self):
-        return self.gameState.getLegalActions(self.PACMAN_INDEX)
+        while depth <= maxDepth:
+            if self.DEBUG_PRINTS:
+                print "Creating layers on depth: " + str(depth)
+                print "nextRoundStates to pass are: " + str(nextRoundStates)
 
-    def getPossibleNextPacmanStates(self, actions):
-        nextStates = []
+            nextRoundStates = self.createLayersForRound(nextRoundStates)
 
-        for act in actions:
-            state = self.gameState.generateSuccessor(self.PACMAN_INDEX, act)
-            nextStates.append(state)
+            # pacmanActions = self.getLegalPacmanActions(gameState)
+            # pacmanPossibleStates = self.getPossibleNextStates(gameState, pacmanActions, self.PACMAN_INDEX)
 
-        return nextStates
+            depth = depth + 1 # TODO put to correct place
 
-    def getStateScores(self, states):
-        scores = []
+#            # TODO need to assign parents for states added to tree
+#            for pacState in pacmanPossibleStates:
+#                # tree.push(pacState)
+#                ghostActions = self.getLegalGhostActions(pacState, ghostAmount)
+#
+#                # TODO Make new layer in tree for each ghost
+#                for ghostIndex in range(0, len(ghostActions)):
+#                    singleGhostActions = ghostActions[ghostIndex]
+#                    ghostStates = self.getPossibleNextStates(gameState, singleGhostActions, ghostIndex + 1)
+#                    print "for ghost [" + str(ghostIndex) + "] got ghostStatuses: " + str(ghostStates)
 
-        for s in states:
-            score = self.evaluationFunction(s)
-            scores.append(score)
+    def createLayersForRound(self, roundStates):
+        ghostAmount = self.getGhostAmount()
+        nextRoundStates = []
+        newStates = []
 
-        return scores
+        if self.DEBUG_PRINTS:
+            print "createLayersForRound, roundStates is: " + str(roundStates)
+
+        for state in roundStates:
+            newStates = newStates + self.createTreeLayerForAgent(state, self.PACMAN_INDEX)
+
+        for ghostNum in range(0, ghostAmount):
+            for state in newStates:
+                nextRoundStates = nextRoundStates + self.createTreeLayerForAgent(state, ghostNum + 1)
+
+        return nextRoundStates
+
+    def createTreeLayerForAgent(self, gameState, agentIndex):
+        actions = self.getLegalAgentActions(gameState, agentIndex)
+        possibleNextStates = self.getPossibleNextStates(gameState, actions, agentIndex)
+
+        for state in possibleNextStates:
+            self.searchTree.push(state)
+
+        return possibleNextStates
+
+    # NOTE will not use this function if discovery and score calculation is done at the same time
+    def calculateMinimaxValue(self):
+        # Score is calculated the first time when max depth is found
+
+        # pacmanStateScores = self.getStateScores(pacmanPossibleStates)
+        # pacmanStateScorePairs = self.makeScorePairs(pacmanPossibleStates, pacmanStateScores)
+
+        return "Minimax calculation not yet implemented"
 
     def makeScorePairs(self, states, scores):
         pairs = []
@@ -427,6 +466,54 @@ class MinimaxAgent(MultiAgentSearchAgent):
             pairs.append(pair)
 
         return pairs
+
+    def getLegalGhostActions(self, gameState, ghostAmount):
+        allLegalActions = []
+
+        if self.DEBUG_PRINTS:
+            print "getting legal ghost actions, ghost amount is: " + str(ghostAmount)
+
+        for i in range(self.FIRST_GHOST_INDEX, self.FIRST_GHOST_INDEX + ghostAmount):
+            legalActions = gameState.getLegalActions(i)
+            allLegalActions.append(legalActions)
+
+        gameState.getLegalActions()
+
+        return allLegalActions
+
+    def getPossibleNextGhostStates(self, actions, gameState):
+        nextStatuses
+        return 
+
+    def getLegalPacmanActions(self, gameState):
+        return gameState.getLegalActions(self.PACMAN_INDEX)
+
+    def getLegalAgentActions(self, gameState, index):
+        return gameState.getLegalActions(index)
+
+    def getPossibleNextStates(self, gameState, actions, index):
+        nextStates = []
+
+        for a in actions:
+            state = gameState.generateSuccessor(index, a)
+            nextStates.append(state)
+
+        return nextStates
+
+    def getStateScores(self, states):
+        scores = []
+
+        for s in states:
+            score = self.evaluationFunction(s)
+            scores.append(score)
+
+        return scores
+
+    def getGhostAmount(self):
+        return self.rootGameState.getNumAgents() - 1
+
+    def getDepth(self):
+        return self.depth
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
