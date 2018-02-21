@@ -419,18 +419,28 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
         scoreKeys = self.scores.keys()
         selectedDirectionKeys = self.selectedDirections.keys()
-        print "scoreKeys are: " + str(scoreKeys)
+        nextAction = self.optimalNextAction()
 
-        for key in scoreKeys:
-            print "For state " + str(key) + ", score is: " + str(self.scores[key])
+        if self.DEBUG_PRINTS:
+            print "scoreKeys are: " + str(scoreKeys)
 
-        for key in selectedDirectionKeys:
-            print "For state " + str(key) + ", direction is: " + str(self.selectedDirections[key])
+            for key in scoreKeys:
+                print "For state " + str(key) + ", score is: " + str(self.scores[key])
+
+            for key in selectedDirectionKeys:
+                print "For state " + str(key) + ", direction is: " + str(self.selectedDirections[key])
+
+            print "nextAction is: " + str(nextAction)
 
         # util.raiseNotDefined()
 
         # TODO replace with sane value when search working
-        return self.rootGameState.getLegalActions(self.PACMAN_INDEX)[2]
+        # return self.rootGameState.getLegalActions(self.PACMAN_INDEX)[2]
+
+        return nextAction
+
+    def optimalNextAction(self):
+        return self.selectedDirections[self.rootGameState]
 
     def constructSearchTree(self):
         maxDepth = self.getDepth()
