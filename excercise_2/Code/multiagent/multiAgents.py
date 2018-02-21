@@ -346,6 +346,9 @@ class MultiAgentSearchAgent(Agent):
         self.MAX_TAG = "max"
         self.MIN_TAG = "min"
 
+        self.layer = 0
+        self.layers = {}
+
         self.DEBUG_PRINTS = True
 
         self.searchTree = Stack()
@@ -411,16 +414,34 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
         scoreKeys = self.scores.keys()
         selectedDirectionKeys = self.selectedDirections.keys()
+        layerKeys = self.layers.keys()
         nextAction = self.optimalNextAction()
 
         if self.DEBUG_PRINTS:
             print "scoreKeys are: " + str(scoreKeys)
 
-            for key in scoreKeys:
-                print "For state " + str(key) + ", score is: " + str(self.scores[key])
+            # layerKeys should contain all states
+            for key in layerKeys:
+                try:
+                    score = self.scores[key]
+                except KeyError:
+                    score = "<not found>"
 
-            for key in selectedDirectionKeys:
-                print "For state " + str(key) + ", direction is: " + str(self.selectedDirections[key])
+                try:
+                    direction = self.selectedDirections[key]
+                except KeyError:
+                    direction = "<not found>"
+
+                try:
+                    parent = self.parents[key]
+                except KeyError:
+                    parent = "<not found>"
+
+                print "For state " + str(key)
+                print "\tscore is: " + str(score)
+                print "\tdirection is: " + str(direction)
+                print "\tparent is: " + str(parent)
+                print "\tlayer is: " + str(self.layers[key])
 
             print "nextAction is: " + str(nextAction)
 
@@ -460,11 +481,14 @@ class MinimaxAgent(MultiAgentSearchAgent):
             print "createLayersForRound, roundStates is: " + str(roundStates)
 
         if self.DEBUG_PRINTS:
-            print "Creating pacman layer"
+            print "Creating pacman layer. Layer: " + str(self.layer)
         for state in roundStates:
             if self.DEBUG_PRINTS:
                 print "Handling state " + str(state) + " of roundStates"
             newStates = newStates + self.createTreeLayerForAgent(state, self.PACMAN_INDEX)
+
+        self.layer = self.layer + 1
+
         if self.DEBUG_PRINTS:
             print "Done creating pacman layer"
 
@@ -474,11 +498,14 @@ class MinimaxAgent(MultiAgentSearchAgent):
             return newStates
 
         if self.DEBUG_PRINTS:
-            print "Creating ghost layers"
+            print "Creating ghost layers. Layer: " + str(self.layer)
         for ghostNum in range(0, ghostAmount):
             print "Creating layer for ghostNum: " + str(ghostNum)
             for state in newStates:
                 nextRoundStates = nextRoundStates + self.createTreeLayerForAgent(state, ghostNum + 1)
+
+        self.layer = self.layer + 1
+
         if self.DEBUG_PRINTS:
             print "Done creating ghost layers"
             if [] == nextRoundStates and self.DEBUG_PRINTS:
@@ -507,6 +534,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
             else:
                 tag = self.MIN_TAG
 
+            self.layers[state] = self.layer
             self.searchTree.push(self.makeSearchNode(state, tag))
 
         return possibleNextStates
@@ -612,7 +640,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
         for a in actions:
             state = gameState.generateSuccessor(index, a)
-            self.parents[state] = (gameState, a)
+            self.addParent(state, gameState, a)
             print "For action " + str(a) + " got successor: " + str(state)
             nextStates.append(state)
 
@@ -626,6 +654,9 @@ class MinimaxAgent(MultiAgentSearchAgent):
             scores.append(score)
 
         return scores
+
+    def addParent(self, childState, parentState, action):
+        self.parents[childState] = (parentState, action)
 
     def getGhostAmount(self):
         return self.rootGameState.getNumAgents() - 1
