@@ -391,7 +391,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
             except:
                 print "rootGameState getScore resulted in exception"
 
-        # searchTree = self.constructSearchTree()
         self.constructSearchTree()
 
         if self.DEBUG_PRINTS:
@@ -408,14 +407,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 self.searchTree.push(restoreStack.pop())
             print "done printing Stack content"
 
-            # print "printing stack again"
-            # while not self.searchTree.isEmpty():
-            #     print str(self.searchTree.pop())
-            # print "done printing stack again"
-
-        minimaxDecision = self.calculateMinimaxValue()
-        # if self.DEBUG_PRINTS:
-        #     print "minimaxValue is: " + str(minimaxValue)
+        self.setStateTransitionsByMinimax()
 
         scoreKeys = self.scores.keys()
         selectedDirectionKeys = self.selectedDirections.keys()
@@ -432,11 +424,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
             print "nextAction is: " + str(nextAction)
 
-        # util.raiseNotDefined()
-
-        # TODO replace with sane value when search working
-        # return self.rootGameState.getLegalActions(self.PACMAN_INDEX)[2]
-
         return nextAction
 
     def optimalNextAction(self):
@@ -452,76 +439,17 @@ class MinimaxAgent(MultiAgentSearchAgent):
         nextRoundStates = []
         nextRoundStates.append(self.rootGameState)
 
-        # print "ghostActions is: " + str(ghostActions)
-        # print "pacmanActions is: " + str(pacmanActions)
-
-        # print "pacmanPossibleStates is: " + str(pacmanPossibleStates)
-        # print "pacmanStateScores is: " + str(pacmanStateScores)
-        # print "pacmanStateScorePairs is: " + str(pacmanStateScorePairs)
-
         while depth <= maxDepth:
             if self.DEBUG_PRINTS:
                 print "\n===== Creating layers on depth: " + str(depth) + " ======"
                 print "nextRoundStates to pass are: " + str(nextRoundStates)
 
             nextRoundStates = self.createLayersForRound(nextRoundStates)
-            # nextRoundStates = self.createAlternatingTreeLayerForRound(nextRoundStates)
 
-            # pacmanActions = self.getLegalPacmanActions(gameState)
-            # pacmanPossibleStates = self.getPossibleNextStates(gameState, pacmanActions, self.PACMAN_INDEX)
-
-            depth = depth + 1 # TODO put to correct place
+            depth = depth + 1 # NOTE make sure that depth is updated correctly
 
         if self.DEBUG_PRINTS:
             print "===== Max depth reached ====="
-
-
-#            # TODO need to assign parents for states added to tree
-#            for pacState in pacmanPossibleStates:
-#                # tree.push(pacState)
-#                ghostActions = self.getLegalGhostActions(pacState, ghostAmount)
-#
-#                # TODO Make new layer in tree for each ghost
-#                for ghostIndex in range(0, len(ghostActions)):
-#                    singleGhostActions = ghostActions[ghostIndex]
-#                    ghostStates = self.getPossibleNextStates(gameState, singleGhostActions, ghostIndex + 1)
-#                    print "for ghost [" + str(ghostIndex) + "] got ghostStatuses: " + str(ghostStates)
-
-    # Alternate between creating (pacman / max) and (ghost / min) layers on
-    # calls.
-    # def createAlternatingTreeLayerForRound(self, roundStates):
-    #     ghostAmount = self.getGhostAmount()
-    #     nextRoundStates = []
-    #     newStates = [] 
-    #     if self.DEBUG_PRINTS:
-    #         print "createAlternatingLayerForRound, roundStates is: " + str(roundStates)
-
-    #     if self.layerTurn == self.PACMAN_LAYER_TURN:
-    #         if self.DEBUG_PRINTS:
-    #             print "Creating pacman layer"
-    #         for state in roundStates:
-    #             if self.DEBUG_PRINTS:
-    #                 print "Handling state " + str(state) + " of roundStates"
-    #             # newStates = newStates + self.createTreeLayerForAgent(state, self.PACMAN_INDEX)
-    #             nextRoundStates = nextRoundStates + self.createTreeLayerForAgent(state, self.PACMAN_INDEX)
-    #         if self.DEBUG_PRINTS:
-    #             print "Done creating pacman layer"
-
-    #         self.layerTurn = self.GHOST_LAYER_TURN
-    #     else:
-    #         if self.DEBUG_PRINTS:
-    #             print "Creating ghost layers"
-    #         for ghostNum in range(0, ghostAmount):
-    #             print "Creating layer for ghostNum: " + str(ghostNum)
-    #             # for state in newStates:
-    #             for state in roundStates:
-    #                 nextRoundStates = nextRoundStates + self.createTreeLayerForAgent(state, ghostNum + 1)
-    #         if self.DEBUG_PRINTS:
-    #             print "Done creating ghost layers"
-
-    #         self.layerTurn = self.PACMAN_LAYER_TURN
-
-    #     return nextRoundStates
 
     def createLayersForRound(self, roundStates):
         ghostAmount = self.getGhostAmount()
@@ -556,40 +484,12 @@ class MinimaxAgent(MultiAgentSearchAgent):
             if [] == nextRoundStates and self.DEBUG_PRINTS:
                 print "===== Supposedly was layer with leaf nodes ====="
 
-            # try:
-            #     # It looks like states which have pacman in same position as
-            #     # before can have different hash. Keeping track of already
-            #     # discovered states when creating the tree seems to be the
-            #     # wrong thing to do.
-            #     if True == self.alreadyDiscovered[state]:
-            #         if self.DEBUG_PRINTS:
-            #             print "Already discovered"
-            #         pass
-            # except KeyError:
-            #     self.alreadyDiscovered[state] = True
-            #     # newStates + self.createTreeLayerForAgent(state, self.PACMAN_INDEX)
-
-            # newStates = newStates + self.createTreeLayerForAgent(state, self.PACMAN_INDEX)
-            # for newState in newStates:
-            #     try:
-            #         if True == self.alreadyDiscovered[newState]:
-            #             if self.DEBUG_PRINTS:
-            #                 print "Already discovered"
-            #             pass
-            #     except KeyError:
-            #         self.alreadyDiscovered[newState] = True
-            #         newStates + self.createTreeLayerForAgent(state, self.PACMAN_INDEX)
-            #         # nextRoundStates.append(newState)
-
-
         # Return states which are possible next pacman states. They will be
         # used next round to get the next possible moves.
         # When previously returned ghost positions which were used to get
         # pacman positions, empty actions were returned by getLegalActions.
         # Makes sense as these possible moves for ghosts are far from pacman.
         # Moving to them would be teleporting.
-        # return newStates
-
         return nextRoundStates
 
     def createTreeLayerForAgent(self, gameState, agentIndex):
@@ -614,7 +514,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
     def makeSearchNode(self, state, tag):
         return (state, tag)
 
-    def calculateMinimaxValue(self):
+    def setStateTransitionsByMinimax(self):
         # Stack is ordered so that states of last layer are popped first,
         # then states of second last layer etc.
 
@@ -634,7 +534,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
             parent = self.parents[state]
 
-            # Will cause exception if not leaf node
+            # Will cause exception if state is not leaf node
             try:
                 stateScore = self.evaluationFunction(state)
             except Exception:
@@ -668,14 +568,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
                             + "\n\t set score: " + str(stateScore) \
                             + "\n\t set selectedDirection: " + str(parent[self.PARENT_ACTION_POS])
 
-        # self.searchTree
-        # Score is calculated the first time when max depth is found
-
-        # pacmanStateScores = self.getStateScores(pacmanPossibleStates)
-        # pacmanStateScorePairs = self.makeScorePairs(pacmanPossibleStates, pacmanStateScores)
-
-        return "Minimax calculation not yet implemented"
-
     def makeScorePairs(self, states, scores):
         pairs = []
 
@@ -703,10 +595,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
         gameState.getLegalActions()
 
         return allLegalActions
-
-    # def getPossibleNextGhostStates(self, actions, gameState):
-    #     nextStatuses
-    #     return
 
     def getLegalPacmanActions(self, gameState):
         return gameState.getLegalActions(self.PACMAN_INDEX)
