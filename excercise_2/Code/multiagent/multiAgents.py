@@ -497,18 +497,20 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 print "===== Supposedly was layer with leaf nodes. Ending early ====="
             return newStates
 
-        if self.DEBUG_PRINTS:
-            print "Creating ghost layers. Layer: " + str(self.layer)
         for ghostNum in range(0, ghostAmount):
-            print "Creating layer for ghostNum: " + str(ghostNum)
-            for state in newStates:
-                nextRoundStates = nextRoundStates + self.createTreeLayerForAgent(state, ghostNum + 1)
+            if self.DEBUG_PRINTS:
+                print "Creating ghost layers. ghostNum: " + str(ghostNum) + ", Layer: " + str(self.layer)
 
-        self.layer = self.layer + 1
+            statesForCurrentLayer = newStates
+            newStates = []
+            for state in statesForCurrentLayer:
+                newStates = newStates + self.createTreeLayerForAgent(state, ghostNum + 1)
+
+            self.layer = self.layer + 1
 
         if self.DEBUG_PRINTS:
             print "Done creating ghost layers"
-            if [] == nextRoundStates and self.DEBUG_PRINTS:
+            if [] == newStates and self.DEBUG_PRINTS:
                 print "===== Supposedly was layer with leaf nodes ====="
 
         # Return states which are possible next pacman states. They will be
@@ -517,7 +519,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
         # pacman positions, empty actions were returned by getLegalActions.
         # Makes sense as these possible moves for ghosts are far from pacman.
         # Moving to them would be teleporting.
-        return nextRoundStates
+        return newStates
 
     def createTreeLayerForAgent(self, gameState, agentIndex):
         if self.DEBUG_PRINTS:
@@ -576,14 +578,16 @@ class MinimaxAgent(MultiAgentSearchAgent):
                     if self.DEBUG_PRINTS:
                         print "For state " + str(parent[self.PARENT_STATE_POS]) \
                                 + "\n\tset score: " + str(stateScore) \
-                                + "\n\tset selectedDirection: " + str(parent[self.PARENT_ACTION_POS])
+                                + "\n\tset selectedDirection: " + str(parent[self.PARENT_ACTION_POS]) \
+                                + "\n\t maxTurn: " + str(maxTurn)
                 elif (not maxTurn) and (stateScore < parentScore):
                     self.scores[parent[self.PARENT_STATE_POS]] = stateScore
                     self.selectedDirections[parent[self.PARENT_STATE_POS]] = parent[self.PARENT_ACTION_POS]
                     if self.DEBUG_PRINTS:
                         print "For state " + str(parent[self.PARENT_STATE_POS]) \
                                 + "\n\tset score: " + str(stateScore) \
-                                + "\n\tset selectedDirection: " + str(parent[self.PARENT_ACTION_POS])
+                                + "\n\tset selectedDirection: " + str(parent[self.PARENT_ACTION_POS]) \
+                                + "\n\t maxTurn: " + str(maxTurn)
                 else:
                     if self.DEBUG_PRINTS:
                         print "\tmaxTurn: " + str(maxTurn) + ", stateScore " + str(stateScore) + " not change in parent score " + str(parentScore)
@@ -594,7 +598,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 if self.DEBUG_PRINTS:
                     print "For state " + str(parent[self.PARENT_STATE_POS]) \
                             + "\n\t set score: " + str(stateScore) \
-                            + "\n\t set selectedDirection: " + str(parent[self.PARENT_ACTION_POS])
+                            + "\n\t set selectedDirection: " + str(parent[self.PARENT_ACTION_POS]) \
+                            + "\n\t maxTurn: " + str(maxTurn)
 
     def makeScorePairs(self, states, scores):
         pairs = []
