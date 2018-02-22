@@ -698,6 +698,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
         return scores
 
     def addParent(self, childState, parentState, action):
+        if self.DEBUG_PRINTS:
+            print "Setting parent: " + str((parentState), "debug_tuple") + " to child: " + str((childState, "debug_tuple"))
         self.parents[childState] = (parentState, action)
 
     def getGhostAmount(self):
