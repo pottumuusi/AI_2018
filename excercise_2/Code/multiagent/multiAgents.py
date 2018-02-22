@@ -439,10 +439,10 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 except KeyError:
                     parent = "<not found>"
 
-                print "For state " + str(key)
+                print "For state " + str((key, "debug_tuple"))
                 print "\tscore is: " + str(score)
                 print "\tdirection is: " + str(direction)
-                print "\tparent is: " + str(parent)
+                print "\tparent is: " + str((parent, "debug_tuple"))
                 print "\tlayer is: " + str(self.layers[key])
 
             print "nextAction is: " + str(nextAction)
@@ -486,7 +486,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
             print "Creating pacman layer. Layer: " + str(self.layer)
         for state in roundStates:
             if self.DEBUG_PRINTS:
-                print "Handling state " + str(state) + " of roundStates"
+                print "Handling state " + str((state, "debug_tuple")) + " of roundStates"
             newStates = newStates + self.createTreeLayerForAgent(state, self.PACMAN_INDEX)
 
         self.layer = self.layer + 1
@@ -528,7 +528,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
     def createTreeLayerForAgent(self, gameState, agentIndex):
         if self.DEBUG_PRINTS:
             print "Creating tree layer for agent with " \
-                + "gameState: " + str(gameState) \
+                + "gameState: " + str((gameState, "debug_tuple")) \
                 + ", agentIndex: " + str(agentIndex)
 
         actions = self.getLegalAgentActions(gameState, agentIndex)
@@ -568,9 +568,9 @@ class MinimaxAgent(MultiAgentSearchAgent):
             parentAction = parent[self.PARENT_ACTION_POS]
 
             if self.DEBUG_PRINTS:
-                print "In Minimax value calculation handling next state: " + str(state) \
-                        + ", parent is: " + str(parent) \
-                        + ", parentState is: " + str(parentState)
+                print "In Minimax value calculation handling next state: " + str((state, "debug_tuple")) \
+                        + ", parent is: " + str((parent, "debug_tuple")) \
+                        + ", parentState is: " + str((parentState, "debug_tuple"))
 
             stateLayer = self.layers[state]
 
@@ -585,7 +585,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 stateScore = self.evaluationFunction(state)
             else:
                 if self.DEBUG_PRINTS:
-                    print "Getting preset score for state " + str(state) \
+                    print "Getting preset score for state " + str((state, "debug_tuple")) \
                             + ", stateLayer is: " + str(stateLayer)
                 stateScore = self.scores[state]
 
@@ -598,7 +598,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
                     self.scores[parentState] = stateScore
                     self.selectedDirections[parentState] = parentAction
                     if self.DEBUG_PRINTS:
-                        print "For state " + str(parentState) \
+                        print "For state " + str((parentState, "debug_tuple")) \
                                 + "\n\tat layer: " + str(parentLayer) \
                                 + "\n\tupdated score: " + str(stateScore) \
                                 + "\n\tset selectedDirection: " + str(parentAction) \
@@ -607,7 +607,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
                     self.scores[parentState] = stateScore
                     self.selectedDirections[parentState] = parentAction
                     if self.DEBUG_PRINTS:
-                        print "For state " + str(parentState) \
+                        print "For state " + str((parentState, "debug_tuple")) \
                                 + "\n\tat layer: " + str(parentLayer) \
                                 + "\n\tupdated score: " + str(stateScore) \
                                 + "\n\tset selectedDirection: " + str(parentAction) \
@@ -620,7 +620,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 self.scores[parentState] = stateScore
                 self.selectedDirections[parentState] = parentAction
                 if self.DEBUG_PRINTS:
-                    print "For state " + str(parentState) \
+                    print "For state " + str((parentState, "debug_tuple")) \
                             + "\n\t at layer: " + str(parentLayer) \
                             + "\n\t set score: " + str(stateScore) \
                             + "\n\t set selectedDirection: " + str(parentAction) \
@@ -670,10 +670,20 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
         for a in actions:
             state = gameState.generateSuccessor(index, a)
+
+            if self.DEBUG_PRINTS:
+                print "UNsetting leaf state: " + str((gameState, "debug_tuple"))
             self.leafStates[gameState] = False
+
+            if self.DEBUG_PRINTS:
+                print "setting leaf state: " + str((state, "debug_tuple"))
             self.leafStates[state] = True
+
             self.addParent(state, gameState, a)
-            print "For action " + str(a) + " got successor: " + str(state)
+
+            if self.DEBUG_PRINTS:
+                print "From state: " + str((gameState, "debug_tuple")) + ", For action " + str(a) + " got successor: " + str((state, "debug_tuple"))
+
             nextStates.append(state)
 
         return nextStates
