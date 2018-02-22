@@ -338,6 +338,7 @@ class MultiAgentSearchAgent(Agent):
 
         self.SEARCH_STATE_POS = 0
         self.SEARCH_MINMAX_POS = 1
+        self.SEARCH_ACTION_POS = 2
 
         self.PACMAN_LAYER_TURN = 0
         self.GHOST_LAYER_TURN = 1
@@ -534,19 +535,36 @@ class MinimaxAgent(MultiAgentSearchAgent):
         actions = self.getLegalAgentActions(gameState, agentIndex)
         possibleNextStates = self.getPossibleNextStates(gameState, actions, agentIndex)
 
-        for state in possibleNextStates:
+        if (len(actions) != len(possibleNextStates)):
+            raise Exception("Different number of actions and possibleNextStates")
+
+        for i in range(0, len(possibleNextStates)):
             if self.PACMAN_INDEX == agentIndex:
                 tag = self.MAX_TAG
             else:
                 tag = self.MIN_TAG
 
+            state = possibleNextStates[i]
+            action = actions[i]
+
             self.layers[state] = self.layer
-            self.searchTree.push(self.makeSearchNode(state, tag))
+            # self.searchTree.push(self.makeSearchNode(state, tag))
+            self.searchTree.push(self.makeSearchNode(state, tag, action))
+
+        # for state in possibleNextStates:
+        #     if self.PACMAN_INDEX == agentIndex:
+        #         tag = self.MAX_TAG
+        #     else:
+        #         tag = self.MIN_TAG
+
+        #     self.layers[state] = self.layer
+        #     self.searchTree.push(self.makeSearchNode(state, tag))
 
         return possibleNextStates
 
-    def makeSearchNode(self, state, tag):
-        return (state, tag)
+    # def makeSearchNode(self, state, tag):
+    def makeSearchNode(self, state, tag, action):
+        return (state, tag, action)
 
     def setStateTransitionsByMinimax(self):
         # Stack is ordered so that states of last layer are popped first,
@@ -555,6 +573,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
         while not self.searchTree.isEmpty():
             searchNode = self.searchTree.pop()
             state = searchNode[self.SEARCH_STATE_POS]
+            action = searchNode[self.SEARCH_ACTION_POS]
 
             if self.MAX_TAG == searchNode[self.SEARCH_MINMAX_POS]:
                 maxTurn = True
@@ -563,7 +582,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
             else:
                 raise Exception("Unrecognized search node minmax pos value")
 
-            parent = self.parents[state]
+            # parent = self.parents[state]
+            parent = self.getParent(state, action)
             parentState = parent[self.PARENT_STATE_POS]
             parentAction = parent[self.PARENT_ACTION_POS]
 
@@ -699,8 +719,17 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
     def addParent(self, childState, parentState, action):
         if self.DEBUG_PRINTS:
-            print "Setting parent: " + str((parentState), "debug_tuple") + " to child: " + str((childState, "debug_tuple"))
-        self.parents[childState] = (parentState, action)
+            print "Setting parent: " + str((parentState, "debug_tuple")) + " to child: " + str((childState, "debug_tuple"))
+
+        # try:
+        #     self.parents[childState]
+        #     except:
+
+        # self.parents[childState] = (parentState, action)
+        self.parents[(childState, action)] = (parentState, action)
+
+    def getParent(self, state, action):
+        return self.parents[(state, action)]
 
     def getGhostAmount(self):
         return self.rootGameState.getNumAgents() - 1
