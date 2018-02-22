@@ -322,6 +322,8 @@ class MultiAgentSearchAgent(Agent):
     def __init__(self, evalFn = 'scoreEvaluationFunction', depth = '2'):
         from util import Stack
 
+        self.DEBUG_PRINTS = True
+
         self.index = 0 # Pacman is always agent index 0
         self.evaluationFunction = util.lookup(evalFn, globals())
         self.depth = int(depth)
@@ -348,22 +350,31 @@ class MultiAgentSearchAgent(Agent):
         self.MIN_TAG = "min"
 
         self.layer = 0
-        self.layers = {}
-        self.leafStates = {}
-
-        self.DEBUG_PRINTS = True
 
         self.searchTree = Stack()
 
-        # self.alreadyDiscovered = {}
         self.parents = {}
         self.scores = {}
         self.selectedDirections = {}
+        self.layers = {}
+        self.leafStates = {}
 
 class MinimaxAgent(MultiAgentSearchAgent):
     """
       Your minimax agent (question 2)
     """
+
+    def initializeMemberStructures(self):
+        from util import Stack
+
+        self.layers = {}
+        self.leafStates = {}
+
+        self.searchTree = Stack()
+
+        self.parents = {}
+        self.scores = {}
+        self.selectedDirections = {}
 
     def getAction(self, gameState):
         """
@@ -387,86 +398,22 @@ class MinimaxAgent(MultiAgentSearchAgent):
         self.rootGameState = gameState
 
         if self.DEBUG_PRINTS:
-            print "\n===== Minimax search starting ====="
-            print "self.depth is: " + str(self.depth)
-            print "gameState is: " + str(gameState)
-            print "evaluationFunction is: " + str(self.evaluationFunction)
-            print "ghostAmount is: " + str(self.getGhostAmount())
-            try:
-                print "rootGameState getScore gives: " + str(self.rootGameState.getScore())
-            except:
-                print "rootGameState getScore resulted in exception"
+            self.printSearchStartStatus()
 
         self.initializeMemberStructures()
-
         self.constructSearchTree()
 
         if self.DEBUG_PRINTS:
-            from util import Stack
-            restoreStack = Stack()
-
-            print "printing Stack content"
-            while not self.searchTree.isEmpty():
-                val = self.searchTree.pop()
-                restoreStack.push(val)
-                print str(val)
-
-            while not restoreStack.isEmpty():
-                self.searchTree.push(restoreStack.pop())
-            print "done printing Stack content"
+            self.printTreeContent()
 
         self.setStateTransitionsByMinimax()
 
-        scoreKeys = self.scores.keys()
-        selectedDirectionKeys = self.selectedDirections.keys()
-        layerKeys = self.layers.keys()
+        if self.DEBUG_PRINTS:
+            self.printSearchEndStatus()
+
         nextAction = self.optimalNextAction()
 
-        if self.DEBUG_PRINTS:
-            print "scoreKeys are: " + str(scoreKeys)
-
-            # layerKeys should contain all states
-            for key in layerKeys:
-                try:
-                    score = self.scores[key]
-                except KeyError:
-                    score = "<not found>"
-
-                try:
-                    direction = self.selectedDirections[key]
-                except KeyError:
-                    direction = "<not found>"
-
-                try:
-                    parent = self.parents[key]
-                except KeyError:
-                    parent = "<not found>"
-
-                print "For state " + str((key, "debug_tuple"))
-                print "\tscore is: " + str(score)
-                print "\tdirection is: " + str(direction)
-                print "\tparent is: " + str((parent, "debug_tuple"))
-                print "\tlayer is: " + str(self.layers[key])
-
-            print "nextAction is: " + str(nextAction)
-
         return nextAction
-
-    def initializeMemberStructures(self):
-        from util import Stack
-
-        self.layers = {}
-        self.leafStates = {}
-
-        self.searchTree = Stack()
-
-        # self.alreadyDiscovered = {}
-        self.parents = {}
-        self.scores = {}
-        self.selectedDirections = {}
-
-    def optimalNextAction(self):
-        return self.selectedDirections[self.rootGameState]
 
     def constructSearchTree(self):
         maxDepth = self.getDepth()
@@ -482,30 +429,37 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
             nextRoundStates = self.createLayersForRound(nextRoundStates)
 
-            depth = depth + 1 # NOTE make sure that depth is updated correctly
+            depth = depth + 1
 
         if self.DEBUG_PRINTS:
             print "===== Max depth reached ====="
 
+    def createLayer(self, layerStates, agentIndex):
+        newStates = []
+
+        if self.DEBUG_PRINTS:
+            agentName = self.agentIndexName(agentIndex)
+            print "Creating " + agentName + " layer. Layer: " + str(self.layer)
+
+        for state in layerStates:
+            if self.DEBUG_PRINTS:
+                print "Handling state " + str((state, "debug_tuple")) + " of layerStates"
+            newStates = newStates + self.createTreeLayerForAgent(state, agentIndex)
+
+        if self.DEBUG_PRINTS:
+            print "Done creating " + agentName + " layer. Layer: " + str(self.layer)
+
+        self.layer = self.layer + 1
+
+        return newStates
+
+    # Create layer for pacman and for each ghost
     def createLayersForRound(self, roundStates):
         ghostAmount = self.getGhostAmount()
         nextRoundStates = []
         newStates = []
 
-        if self.DEBUG_PRINTS:
-            print "createLayersForRound, roundStates is: " + str(roundStates)
-
-        if self.DEBUG_PRINTS:
-            print "Creating pacman layer. Layer: " + str(self.layer)
-        for state in roundStates:
-            if self.DEBUG_PRINTS:
-                print "Handling state " + str((state, "debug_tuple")) + " of roundStates"
-            newStates = newStates + self.createTreeLayerForAgent(state, self.PACMAN_INDEX)
-
-        self.layer = self.layer + 1
-
-        if self.DEBUG_PRINTS:
-            print "Done creating pacman layer"
+        newStates = self.createLayer(roundStates, self.PACMAN_INDEX)
 
         if [] == newStates:
             if self.DEBUG_PRINTS:
@@ -513,18 +467,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
             return newStates
 
         for ghostNum in range(0, ghostAmount):
-            if self.DEBUG_PRINTS:
-                print "Creating ghost layers. ghostNum: " + str(ghostNum) + ", Layer: " + str(self.layer)
-
-            statesForCurrentLayer = newStates
-            newStates = []
-            for state in statesForCurrentLayer:
-                newStates = newStates + self.createTreeLayerForAgent(state, ghostNum + 1)
-
-            self.layer = self.layer + 1
-
-        if self.DEBUG_PRINTS:
-            print "Done creating ghost layers"
+            newStates = self.createLayer(newStates, ghostNum + 1)
 
         if [] == newStates:
             if self.DEBUG_PRINTS:
@@ -563,18 +506,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
             # self.searchTree.push(self.makeSearchNode(state, tag))
             self.searchTree.push(self.makeSearchNode(state, tag, action, self.layer, gameState))
 
-        # for state in possibleNextStates:
-        #     if self.PACMAN_INDEX == agentIndex:
-        #         tag = self.MAX_TAG
-        #     else:
-        #         tag = self.MIN_TAG
-
-        #     self.layers[state] = self.layer
-        #     self.searchTree.push(self.makeSearchNode(state, tag))
-
         return possibleNextStates
 
-    # def makeSearchNode(self, state, tag):
     def makeSearchNode(self, state, tag, action, layer, gameState):
         return (state, tag, action, layer, gameState)
 
@@ -751,6 +684,76 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
     def isLeafState(self, state):
         return self.leafStates[state]
+
+    def optimalNextAction(self):
+        return self.selectedDirections[self.rootGameState]
+
+    def agentIndexName(self, index):
+        if (index == self.PACMAN_INDEX):
+            return "pacman"
+
+        if (index > self.PACMAN_INDEX):
+            return "ghost"
+
+        raise Exception("Unexpected agent index: " + str(index))
+
+    def printTreeContent(self):
+        from util import Stack
+        restoreStack = Stack()
+
+        print "printing Stack content"
+        while not self.searchTree.isEmpty():
+            val = self.searchTree.pop()
+            restoreStack.push(val)
+            print str(val)
+
+        while not restoreStack.isEmpty():
+            self.searchTree.push(restoreStack.pop())
+        print "done printing Stack content"
+
+    def printSearchStartStatus(self):
+        print "\n===== Minimax search starting ====="
+        print "self.depth is: " + str(self.depth)
+        print "gameState is: " + str(self.rootGameState)
+        print "evaluationFunction is: " + str(self.evaluationFunction)
+        print "ghostAmount is: " + str(self.getGhostAmount())
+        try:
+            print "rootGameState getScore gives: " + str(self.rootGameState.getScore())
+        except:
+            print "rootGameState getScore resulted in exception"
+
+    def printSearchEndStatus(self):
+        scoreKeys = self.scores.keys()
+        selectedDirectionKeys = self.selectedDirections.keys()
+        layerKeys = self.layers.keys()
+        nextAction = self.optimalNextAction()
+
+        print "scoreKeys are: " + str(scoreKeys)
+
+        # layerKeys should contain all states
+        for key in layerKeys:
+            try:
+                score = self.scores[key]
+            except KeyError:
+                score = "<not found>"
+
+            try:
+                direction = self.selectedDirections[key]
+            except KeyError:
+                direction = "<not found>"
+
+            try:
+                parent = self.parents[key]
+            except KeyError:
+                parent = "<not found>"
+
+            print "For state " + str((key, "debug_tuple"))
+            print "\tscore is: " + str(score)
+            print "\tdirection is: " + str(direction)
+            print "\tparent is: " + str((parent, "debug_tuple"))
+            print "\tlayer is: " + str(self.layers[key])
+
+        print "nextAction is: " + str(nextAction)
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
