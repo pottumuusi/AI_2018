@@ -777,7 +777,10 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         # self.addNodeToTree(self.rootGameState, currentDepth + 1, self.cycleIndex(index))
         # self.addNodeToTree(self.rootGameState, currentDepth, self.cycleIndex(index))
         newNode = self.makeSearchNode(self.rootGameState, currentDepth, self.cycleIndex(currentIndex))
-        self.addNodeToTree(newNode)
+        parentNodeOfFirstNode = None
+        self.addNodeToTree(newNode, parentNodeOfFirstNode)
+
+        # action = self.doSearch()
 
         while not self.searchTreeEmpty():
             currentNode = self.nextTreeNode()
@@ -793,9 +796,9 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             if self.DEBUG_PRINTS:
                 print "Got successors: " + str(successors)
 
-
-            if self.rootGameState != currentNode[self.SEARCH_STATE_POS]:
-                parentNode = self.parents[currentNode]
+            # if self.rootGameState != currentNode[self.SEARCH_STATE_POS]:
+            parentNode = self.parents[currentNode]
+            if None != parentNode:
                 parentAlphaScore = parentNode[self.SEARCH_ALPHA_POS]
                 parentBetaScore = parentNode[self.SEARCH_BETA_POS]
 
@@ -814,7 +817,8 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                         + "\ncurrentDepth: " + str(currentDepth) \
                         + "\ncurrentIndex: " + str(currentIndex) \
                         + "\nmaxPlayer: " + str(maxPlayer) \
-                        + "\ncurrentScore: " + str(currentScore)
+                        + "\ncurrentScore: " + str(currentScore) \
+                        + "\nparentNode: " + str(parentNode)
 
             # handle max and min players
             # if maxPlayer:
@@ -831,8 +835,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 # stop considering these successors
 
                 newNode = self.makeSearchNode(state, currentDepth + 1, self.cycleIndex(currentIndex))
-                self.parents[newNode] = currentNode
-                self.addNodeToTree(newNode)
+                self.addNodeToTree(newNode, currentNode)
 
             # TODO assign sane value to selectedAction
             if None == selectedAction:
@@ -880,7 +883,8 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         score = None
         return (state, depth, index, alphaScore, betaScore, score)
 
-    def addNodeToTree(self, node):
+    def addNodeToTree(self, node, parentNode):
+        self.parents[node] = parentNode
         self.searchTree.push(node)
 
     def searchTreeEmpty(self):
