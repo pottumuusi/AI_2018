@@ -397,6 +397,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
             except:
                 print "rootGameState getScore resulted in exception"
 
+        self.initializeMemberStructures()
+
         self.constructSearchTree()
 
         if self.DEBUG_PRINTS:
@@ -450,15 +452,25 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
         return nextAction
 
+    def initializeMemberStructures(self):
+        from util import Stack
+
+        self.layers = {}
+        self.leafStates = {}
+
+        self.searchTree = Stack()
+
+        # self.alreadyDiscovered = {}
+        self.parents = {}
+        self.scores = {}
+        self.selectedDirections = {}
+
     def optimalNextAction(self):
         return self.selectedDirections[self.rootGameState]
 
     def constructSearchTree(self):
         maxDepth = self.getDepth()
         depth = 1
-
-        if self.DEBUG_PRINTS:
-            print "constructSearchTree, depth is: " + str(depth)
 
         nextRoundStates = []
         nextRoundStates.append(self.rootGameState)
@@ -549,7 +561,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
             self.layers[state] = self.layer
             # self.searchTree.push(self.makeSearchNode(state, tag))
-            self.searchTree.push(self.makeSearchNode(state, tag, action))
+            self.searchTree.push(self.makeSearchNode(state, tag, action, self.layer, gameState))
 
         # for state in possibleNextStates:
         #     if self.PACMAN_INDEX == agentIndex:
@@ -563,8 +575,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
         return possibleNextStates
 
     # def makeSearchNode(self, state, tag):
-    def makeSearchNode(self, state, tag, action):
-        return (state, tag, action)
+    def makeSearchNode(self, state, tag, action, layer, gameState):
+        return (state, tag, action, layer, gameState)
 
     def setStateTransitionsByMinimax(self):
         # Stack is ordered so that states of last layer are popped first,
