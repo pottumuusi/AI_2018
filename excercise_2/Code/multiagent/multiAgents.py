@@ -322,7 +322,7 @@ class MultiAgentSearchAgent(Agent):
     def __init__(self, evalFn = 'scoreEvaluationFunction', depth = '2'):
         from util import Stack
 
-        self.DEBUG_PRINTS = False
+        self.DEBUG_PRINTS = True
 
         self.index = 0 # Pacman is always agent index 0
         self.evaluationFunction = util.lookup(evalFn, globals())
@@ -341,6 +341,11 @@ class MultiAgentSearchAgent(Agent):
         self.SEARCH_STATE_POS = 0
         self.SEARCH_MINMAX_POS = 1
         self.SEARCH_ACTION_POS = 2
+
+        # Used by alpha-beta pruning
+        self.SEARCH_DEPTH_POS = 1
+        self.SEARCH_AGENT_INDEX_POS = 2
+        # Used by alpha-beta pruning
 
         self.PACMAN_LAYER_TURN = 0
         self.GHOST_LAYER_TURN = 1
@@ -746,7 +751,107 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
           Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        from util import Stack
+
+        self.rootGameState = gameState
+        self.searchTree = Stack()
+        alpha = float("-inf")
+        beta = float("inf")
+        index = None
+
+        selectedAction = None
+        maxDepth = self.depth
+        currentDepth = 0
+
+        if self.DEBUG_PRINTS:
+            print "\n===== AlphaBetaAgent getAction() ====="
+
+        if self.DEBUG_PRINTS:
+            print "Initial values, maxDepth: " + str(maxDepth) \
+                    + "\n"
+
+        self.addNodeToTree(self.rootGameState, currentDepth + 1, self.cycleIndex(index))
+
+        while not self.searchTreeEmpty():
+            node = self.nextTreeNode()
+            currentState = node[self.SEARCH_STATE_POS]
+            currentDepth = node[self.SEARCH_DEPTH_POS]
+            currentIndex = node[self.SEARCH_AGENT_INDEX_POS]
+
+            if self.DEBUG_PRINTS:
+                print "===== Next round =====\n" \
+                        + "currentState: " + str(currentState) \
+                        + ", currentDepth: " + str(currentDepth) \
+                        + ", currentIndex: " + str(currentIndex)
+
+            actions = self.getLegalAgentActions(currentState, currentIndex)
+            successors = self.getPossibleNextStates(currentState, actions, currentIndex)
+            if self.DEBUG_PRINTS:
+                print "Got successors: " + str(successors)
+
+            # When should depth be reset?
+            # When backtracking, how to know what the depth is?
+            # Just add depth when adding node to search tree
+            if self.handlingLeafState(successors, currentDepth):
+                if self.DEBUG_PRINTS:
+                    print "Handling leaf state"
+
+            # Push successors to stack and pop one immediately (in beginning of loop)
+            for state in successors:
+                self.addNodeToTree(state, currentDepth, self.cycleIndex(currentIndex))
+
+            # TODO assign sane value to selectedAction
+            if None == selectedAction:
+                selectedAction = actions[0]
+
+        return selectedAction
+
+    # If 2 ghosts
+    # When pacman index, next get ghost 1 index.
+    # When ghost 1, next get ghost 2 index.
+    # When ghost 2, next get pacman index
+    def cycleIndex(self, index):
+        if None == index:
+            return self.PACMAN_INDEX
+
+        if self.getGhostAmount() == index:
+            return self.PACMAN_INDEX
+
+        if self.PACMAN_INDEX == index:
+            return self.FIRST_GHOST_INDEX
+
+        if index < self.PACMAN_INDEX:
+            raise Exception("Unknown index " + str(index))
+
+        return index + 1 # next ghost position
+
+    def getLegalAgentActions(self, gameState, index):
+        return gameState.getLegalActions(index)
+
+    def getPossibleNextStates(self, gameState, actions, index):
+        nextStates = []
+
+        for a in actions:
+            state = gameState.generateSuccessor(index, a)
+            nextStates.append(state)
+
+        return nextStates
+
+    def getGhostAmount(self):
+        return self.rootGameState.getNumAgents() - 1
+
+    def addNodeToTree(self, state, depth, index):
+        self.searchTree.push((state, depth, index))
+
+    def searchTreeEmpty(self):
+        return self.searchTree.isEmpty()
+
+    def nextTreeNode(self):
+        return self.searchTree.pop()
+
+    def handlingLeafState(self, successors, currentDepth):
+        return (currentDepth == self.depth) or ([] == successors)
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
