@@ -348,6 +348,7 @@ class MultiAgentSearchAgent(Agent):
 
         self.layer = 0
         self.layers = {}
+        self.leafStates = {}
 
         self.DEBUG_PRINTS = True
 
@@ -385,6 +386,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
         self.rootGameState = gameState
 
         if self.DEBUG_PRINTS:
+            print "\n===== Minimax search starting ====="
             print "self.depth is: " + str(self.depth)
             print "gameState is: " + str(gameState)
             print "evaluationFunction is: " + str(self.evaluationFunction)
@@ -492,7 +494,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
         if self.DEBUG_PRINTS:
             print "Done creating pacman layer"
 
-        if [] == newStates and self.DEBUG_PRINTS:
+        if [] == newStates:
             if self.DEBUG_PRINTS:
                 print "===== Supposedly was layer with leaf nodes. Ending early ====="
             return newStates
@@ -510,7 +512,9 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
         if self.DEBUG_PRINTS:
             print "Done creating ghost layers"
-            if [] == newStates and self.DEBUG_PRINTS:
+
+        if [] == newStates:
+            if self.DEBUG_PRINTS:
                 print "===== Supposedly was layer with leaf nodes ====="
 
         # Return states which are possible next pacman states. They will be
@@ -559,46 +563,67 @@ class MinimaxAgent(MultiAgentSearchAgent):
             else:
                 raise Exception("Unrecognized search node minmax pos value")
 
-            if self.DEBUG_PRINTS:
-                print "In Minimax value calculation handling next state: " + str(state)
-
             parent = self.parents[state]
+            parentState = parent[self.PARENT_STATE_POS]
+            parentAction = parent[self.PARENT_ACTION_POS]
 
-            # Will cause exception if state is not leaf node
-            try:
+            if self.DEBUG_PRINTS:
+                print "In Minimax value calculation handling next state: " + str(state) \
+                        + ", parent is: " + str(parent) \
+                        + ", parentState is: " + str(parentState)
+
+            stateLayer = self.layers[state]
+
+            if self.rootGameState == parentState:
+                parentLayer = "<not found>"
+            else:
+                parentLayer = self.layers[parentState]
+
+            if self.isLeafState(state):
+                if self.DEBUG_PRINTS:
+                    print "Evaluating state score on layer: " + str(stateLayer)
                 stateScore = self.evaluationFunction(state)
-            except Exception:
+            else:
+                if self.DEBUG_PRINTS:
+                    print "Getting preset score for state " + str(state) \
+                            + ", stateLayer is: " + str(stateLayer)
                 stateScore = self.scores[state]
 
+            if self.DEBUG_PRINTS:
+                print "Got stateScore: " + str(stateScore)
+
             try:
-                parentScore = self.scores[parent[self.PARENT_STATE_POS]]
+                parentScore = self.scores[parentState]
                 if maxTurn and (stateScore > parentScore):
-                    self.scores[parent[self.PARENT_STATE_POS]] = stateScore
-                    self.selectedDirections[parent[self.PARENT_STATE_POS]] = parent[self.PARENT_ACTION_POS]
+                    self.scores[parentState] = stateScore
+                    self.selectedDirections[parentState] = parentAction
                     if self.DEBUG_PRINTS:
-                        print "For state " + str(parent[self.PARENT_STATE_POS]) \
-                                + "\n\tset score: " + str(stateScore) \
-                                + "\n\tset selectedDirection: " + str(parent[self.PARENT_ACTION_POS]) \
+                        print "For state " + str(parentState) \
+                                + "\n\tat layer: " + str(parentLayer) \
+                                + "\n\tupdated score: " + str(stateScore) \
+                                + "\n\tset selectedDirection: " + str(parentAction) \
                                 + "\n\t maxTurn: " + str(maxTurn)
                 elif (not maxTurn) and (stateScore < parentScore):
-                    self.scores[parent[self.PARENT_STATE_POS]] = stateScore
-                    self.selectedDirections[parent[self.PARENT_STATE_POS]] = parent[self.PARENT_ACTION_POS]
+                    self.scores[parentState] = stateScore
+                    self.selectedDirections[parentState] = parentAction
                     if self.DEBUG_PRINTS:
-                        print "For state " + str(parent[self.PARENT_STATE_POS]) \
-                                + "\n\tset score: " + str(stateScore) \
-                                + "\n\tset selectedDirection: " + str(parent[self.PARENT_ACTION_POS]) \
+                        print "For state " + str(parentState) \
+                                + "\n\tat layer: " + str(parentLayer) \
+                                + "\n\tupdated score: " + str(stateScore) \
+                                + "\n\tset selectedDirection: " + str(parentAction) \
                                 + "\n\t maxTurn: " + str(maxTurn)
                 else:
                     if self.DEBUG_PRINTS:
                         print "\tmaxTurn: " + str(maxTurn) + ", stateScore " + str(stateScore) + " not change in parent score " + str(parentScore)
             except KeyError:
                 # Give current value to parent in case none is present.
-                self.scores[parent[self.PARENT_STATE_POS]] = stateScore
-                self.selectedDirections[parent[self.PARENT_STATE_POS]] = parent[self.PARENT_ACTION_POS]
+                self.scores[parentState] = stateScore
+                self.selectedDirections[parentState] = parentAction
                 if self.DEBUG_PRINTS:
-                    print "For state " + str(parent[self.PARENT_STATE_POS]) \
+                    print "For state " + str(parentState) \
+                            + "\n\t at layer: " + str(parentLayer) \
                             + "\n\t set score: " + str(stateScore) \
-                            + "\n\t set selectedDirection: " + str(parent[self.PARENT_ACTION_POS]) \
+                            + "\n\t set selectedDirection: " + str(parentAction) \
                             + "\n\t maxTurn: " + str(maxTurn)
 
     def makeScorePairs(self, states, scores):
@@ -645,6 +670,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
         for a in actions:
             state = gameState.generateSuccessor(index, a)
+            self.leafStates[gameState] = False
+            self.leafStates[state] = True
             self.addParent(state, gameState, a)
             print "For action " + str(a) + " got successor: " + str(state)
             nextStates.append(state)
@@ -668,6 +695,9 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
     def getDepth(self):
         return self.depth
+
+    def isLeafState(self, state):
+        return self.leafStates[state]
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
