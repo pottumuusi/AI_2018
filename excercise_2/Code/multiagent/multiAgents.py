@@ -345,6 +345,9 @@ class MultiAgentSearchAgent(Agent):
         # Used by alpha-beta pruning
         self.SEARCH_DEPTH_POS = 1
         self.SEARCH_AGENT_INDEX_POS = 2
+        self.SEARCH_ALPHA_POS = 3
+        self.SEARCH_BETA_POS = 4
+        self.SEARCH_SCORE_POS = 5
         # Used by alpha-beta pruning
 
         self.PACMAN_LAYER_TURN = 0
@@ -758,7 +761,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         self.searchTree = Stack()
         alpha = float("-inf")
         beta = float("inf")
-        index = None
+        currentIndex = None
 
         selectedAction = None
         maxDepth = self.depth
@@ -771,35 +774,65 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             print "Initial values, maxDepth: " + str(maxDepth) \
                     + "\n"
 
-        self.addNodeToTree(self.rootGameState, currentDepth + 1, self.cycleIndex(index))
+        # self.addNodeToTree(self.rootGameState, currentDepth + 1, self.cycleIndex(index))
+        # self.addNodeToTree(self.rootGameState, currentDepth, self.cycleIndex(index))
+        newNode = self.makeSearchNode(self.rootGameState, currentDepth, self.cycleIndex(currentIndex))
+        self.addNodeToTree(newNode)
 
         while not self.searchTreeEmpty():
-            node = self.nextTreeNode()
-            currentState = node[self.SEARCH_STATE_POS]
-            currentDepth = node[self.SEARCH_DEPTH_POS]
-            currentIndex = node[self.SEARCH_AGENT_INDEX_POS]
+            currentNode = self.nextTreeNode()
+            currentState = currentNode[self.SEARCH_STATE_POS]
+            currentDepth = currentNode[self.SEARCH_DEPTH_POS]
+            currentIndex = currentNode[self.SEARCH_AGENT_INDEX_POS]
+            currentScore = currentNode[self.SEARCH_SCORE_POS]
 
-            if self.DEBUG_PRINTS:
-                print "===== Next round =====\n" \
-                        + "currentState: " + str(currentState) \
-                        + ", currentDepth: " + str(currentDepth) \
-                        + ", currentIndex: " + str(currentIndex)
+            maxPlayer = self.isMaxPlayer(currentIndex)
 
             actions = self.getLegalAgentActions(currentState, currentIndex)
             successors = self.getPossibleNextStates(currentState, actions, currentIndex)
             if self.DEBUG_PRINTS:
                 print "Got successors: " + str(successors)
 
-            # When should depth be reset?
-            # When backtracking, how to know what the depth is?
-            # Just add depth when adding node to search tree
+
+            if self.rootGameState != currentNode[self.SEARCH_STATE_POS]:
+                parentNode = self.parents[currentNode]
+                parentAlphaScore = parentNode[self.SEARCH_ALPHA_POS]
+                parentBetaScore = parentNode[self.SEARCH_BETA_POS]
+
             if self.handlingLeafState(successors, currentDepth):
+            # if self.handlingLeafState(state, currentDepth, self.cycleIndex(currentIndex)):
                 if self.DEBUG_PRINTS:
                     print "Handling leaf state"
+                # TODO
+                # this results in heuristic value
+                # consider max and min players here also
+                currentScore = self.evaluationFunction(currentState)
 
+            if self.DEBUG_PRINTS:
+                print "===== Next round =====" \
+                        + "\ncurrentState: " + str(currentState) \
+                        + "\ncurrentDepth: " + str(currentDepth) \
+                        + "\ncurrentIndex: " + str(currentIndex) \
+                        + "\nmaxPlayer: " + str(maxPlayer) \
+                        + "\ncurrentScore: " + str(currentScore)
+
+            # handle max and min players
+            # if maxPlayer:
+            # else:
+            #     if parentAlphaScore <=
+            #     if  parentBetaScore
+
+            # TODO decide by pruning whether to add state or not
+            #
             # Push successors to stack and pop one immediately (in beginning of loop)
             for state in successors:
-                self.addNodeToTree(state, currentDepth, self.cycleIndex(currentIndex))
+                # might need to check and handle leaf nodes here.
+                # make a decision whether to push state, not push or
+                # stop considering these successors
+
+                newNode = self.makeSearchNode(state, currentDepth + 1, self.cycleIndex(currentIndex))
+                self.parents[newNode] = currentNode
+                self.addNodeToTree(newNode)
 
             # TODO assign sane value to selectedAction
             if None == selectedAction:
@@ -841,8 +874,14 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     def getGhostAmount(self):
         return self.rootGameState.getNumAgents() - 1
 
-    def addNodeToTree(self, state, depth, index):
-        self.searchTree.push((state, depth, index))
+    def makeSearchNode(self, state, depth, index):
+        betaScore = None
+        alphaScore = None
+        score = None
+        return (state, depth, index, alphaScore, betaScore, score)
+
+    def addNodeToTree(self, node):
+        self.searchTree.push(node)
 
     def searchTreeEmpty(self):
         return self.searchTree.isEmpty()
@@ -850,8 +889,19 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     def nextTreeNode(self):
         return self.searchTree.pop()
 
+    # def handlingLeafState(self, state, currentDepth, currentIndex):
+    #     actions = self.getLegalAgentActions(state, currentIndex)
+    #     successors = self.getPossibleNextStates(state, actions, currentIndex)
+    #     return (currentDepth == self.depth) or ([] == successors)
+
     def handlingLeafState(self, successors, currentDepth):
         return (currentDepth == self.depth) or ([] == successors)
+
+    def isMaxPlayer(self, index):
+        if self.PACMAN_INDEX == index:
+            return True
+
+        return False
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
