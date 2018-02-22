@@ -521,7 +521,9 @@ class MinimaxAgent(MultiAgentSearchAgent):
             nextStates.append(state)
 
             if self.DEBUG_PRINTS:
-                print "From state: " + str((gameState, "debug_tuple")) + ", For action " + str(a) + " got successor: " + str((state, "debug_tuple"))
+                print "From state: " + str((gameState, "debug_tuple")) \
+                        + ", For action " + str(a) + " got successor: " \
+                        + str((state, "debug_tuple"))
 
         return nextStates
 
@@ -550,58 +552,67 @@ class MinimaxAgent(MultiAgentSearchAgent):
             maxTurn = self.nodeFromMaxLayer(searchNode)
 
             if self.DEBUG_PRINTS:
-                print "In Minimax value calculation handling next state: " + str((state, "debug_tuple")) \
+                print "In Minimax value calculation handling next state: " \
+                        + str((state, "debug_tuple")) \
                         + ", parent is: " + str((parent, "debug_tuple")) \
 
             stateScore = self.getScoreOfState(state)
-            self.parentScoreUpdate(parent, stateScore, maxTurn)
 
-    def parentScoreUpdate(self, parent, scoreCandidate, maxTurn):
+            try:
+                self.parentScoreUpdateMinimax(parent, stateScore, maxTurn)
+            except KeyError:
+                self.setFirstParentScore(parent, stateScore, maxTurn)
+
+    def parentScoreUpdateMinimax(self, parent, scoreCandidate, maxTurn):
         parentState = parent[self.PARENT_STATE_POS]
-        parentAction = parent[self.PARENT_ACTION_POS] # parent action leading to child
+        actionToChild = parent[self.PARENT_ACTION_POS]
+        parentScore = self.scores[parentState]
 
-        if self.rootGameState == parentState:
-            parentLayer = "<not found>"
-        else:
-            parentLayer = self.layers[parentState]
+        parentLayer = self.getParentLayer(parentState)
 
-        try:
-            parentScore = self.scores[parentState]
-            if maxTurn and (scoreCandidate > parentScore):
-                self.scores[parentState] = scoreCandidate
-                self.selectedDirections[parentState] = parentAction
-                if self.DEBUG_PRINTS:
-                    print "For state " + str((parentState, "debug_tuple")) \
-                            + "\n\tat layer: " + str(parentLayer) \
-                            + "\n\tupdated score: " + str(scoreCandidate) \
-                            + "\n\tset selectedDirection: " + str(parentAction) \
-                            + "\n\t maxTurn: " + str(maxTurn)
-            elif (not maxTurn) and (scoreCandidate < parentScore):
-                self.scores[parentState] = scoreCandidate
-                self.selectedDirections[parentState] = parentAction
-                if self.DEBUG_PRINTS:
-                    print "For state " + str((parentState, "debug_tuple")) \
-                            + "\n\tat layer: " + str(parentLayer) \
-                            + "\n\tupdated score: " + str(scoreCandidate) \
-                            + "\n\tset selectedDirection: " + str(parentAction) \
-                            + "\n\t maxTurn: " + str(maxTurn)
-            else:
-                if self.DEBUG_PRINTS:
-                    print "\tmaxTurn: " + str(maxTurn) + ", scoreCandidate " + str(scoreCandidate) + " not change in parent score " + str(parentScore)
-        except KeyError:
-            # Give current value to parent in case none is present.
+        if maxTurn and (scoreCandidate > parentScore):
             self.scores[parentState] = scoreCandidate
-            self.selectedDirections[parentState] = parentAction
+            self.selectedDirections[parentState] = actionToChild
             if self.DEBUG_PRINTS:
                 print "For state " + str((parentState, "debug_tuple")) \
-                        + "\n\t at layer: " + str(parentLayer) \
-                        + "\n\t set score: " + str(scoreCandidate) \
-                        + "\n\t set selectedDirection: " + str(parentAction) \
+                        + "\n\tat layer: " + str(parentLayer) \
+                        + "\n\tupdated score: " + str(scoreCandidate) \
+                        + "\n\tset selectedDirection: " + str(actionToChild) \
                         + "\n\t maxTurn: " + str(maxTurn)
+        elif (not maxTurn) and (scoreCandidate < parentScore):
+            self.scores[parentState] = scoreCandidate
+            self.selectedDirections[parentState] = actionToChild
+            if self.DEBUG_PRINTS:
+                print "For state " + str((parentState, "debug_tuple")) \
+                        + "\n\tat layer: " + str(parentLayer) \
+                        + "\n\tupdated score: " + str(scoreCandidate) \
+                        + "\n\tset selectedDirection: " + str(actionToChild) \
+                        + "\n\t maxTurn: " + str(maxTurn)
+        else:
+            if self.DEBUG_PRINTS:
+                print "\tmaxTurn: " + str(maxTurn) + ", scoreCandidate " \
+                        + str(scoreCandidate) \
+                        + ", not change in parent score " + str(parentScore)
+
+    def setFirstParentScore(self, parent, scoreCandidate, maxTurn):
+        parentState = parent[self.PARENT_STATE_POS]
+        actionToChild = parent[self.PARENT_ACTION_POS]
+
+        parentLayer = self.getParentLayer(parentState)
+
+        self.scores[parentState] = scoreCandidate
+        self.selectedDirections[parentState] = actionToChild
+        if self.DEBUG_PRINTS:
+            print "For state " + str((parentState, "debug_tuple")) \
+                    + "\n\t at layer: " + str(parentLayer) \
+                    + "\n\t set score: " + str(scoreCandidate) \
+                    + "\n\t set selectedDirection: " + str(actionToChild) \
+                    + "\n\t maxTurn: " + str(maxTurn)
 
     def addParent(self, childState, parentState, action):
         if self.DEBUG_PRINTS:
-            print "Setting parent: " + str((parentState, "debug_tuple")) + " to child: " + str((childState, "debug_tuple"))
+            print "Setting parent: " + str((parentState, "debug_tuple")) \
+                    + " to child: " + str((childState, "debug_tuple"))
 
         self.parents[(childState, action)] = (parentState, action)
 
@@ -633,6 +644,12 @@ class MinimaxAgent(MultiAgentSearchAgent):
         else:
             raise Exception("Unrecognized search node minmax pos value")
 
+    def getParentLayer(self, parentState):
+        if self.rootGameState == parentState:
+            parentLayer = "<not found>"
+        else:
+            parentLayer = self.layers[parentState]
+
     def getScoreOfState(self, state):
         stateLayer = self.layers[state]
 
@@ -642,7 +659,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
             stateScore = self.evaluationFunction(state)
         else:
             if self.DEBUG_PRINTS:
-                print "Getting preset score for state " + str((state, "debug_tuple")) \
+                print "Getting preset score for state " \
+                        + str((state, "debug_tuple")) \
                         + ", stateLayer is: " + str(stateLayer)
             stateScore = self.scores[state]
 
