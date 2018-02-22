@@ -367,6 +367,9 @@ class MultiAgentSearchAgent(Agent):
         self.layers = {}
         self.leafStates = {}
 
+        self.memberAlpha = None
+        self.memberBeta = None
+
 class MinimaxAgent(MultiAgentSearchAgent):
     """
       Your minimax agent (question 2)
@@ -761,6 +764,10 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         self.searchTree = Stack()
         alpha = float("-inf")
         beta = float("inf")
+
+        self.memberAlpha = float("-inf")
+        self.memberBeta = float("inf")
+
         currentIndex = None
 
         selectedAction = None
@@ -776,72 +783,137 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 
         # self.addNodeToTree(self.rootGameState, currentDepth + 1, self.cycleIndex(index))
         # self.addNodeToTree(self.rootGameState, currentDepth, self.cycleIndex(index))
-        newNode = self.makeSearchNode(self.rootGameState, currentDepth, self.cycleIndex(currentIndex))
+        newNode = self.makeSearchNode(self.rootGameState, currentDepth, self.cycleIndex(currentIndex), alpha, beta)
         parentNodeOfFirstNode = None
         self.addNodeToTree(newNode, parentNodeOfFirstNode)
 
-        # action = self.doSearch()
+        # selectedAction = self.doSearch(newNode)
+        # debugScore = self.doSearch(newNode)
+        debugScore = self.doSearch(newNode, alpha, beta)
 
-        while not self.searchTreeEmpty():
-            currentNode = self.nextTreeNode()
-            currentState = currentNode[self.SEARCH_STATE_POS]
-            currentDepth = currentNode[self.SEARCH_DEPTH_POS]
-            currentIndex = currentNode[self.SEARCH_AGENT_INDEX_POS]
-            currentScore = currentNode[self.SEARCH_SCORE_POS]
+        if self.DEBUG_PRINTS:
+            print "on top level the returned debugScore is: " + str(debugScore)
 
-            maxPlayer = self.isMaxPlayer(currentIndex)
-
-            actions = self.getLegalAgentActions(currentState, currentIndex)
-            successors = self.getPossibleNextStates(currentState, actions, currentIndex)
-            if self.DEBUG_PRINTS:
-                print "Got successors: " + str(successors)
-
-            # if self.rootGameState != currentNode[self.SEARCH_STATE_POS]:
-            parentNode = self.parents[currentNode]
-            if None != parentNode:
-                parentAlphaScore = parentNode[self.SEARCH_ALPHA_POS]
-                parentBetaScore = parentNode[self.SEARCH_BETA_POS]
-
-            if self.handlingLeafState(successors, currentDepth):
-            # if self.handlingLeafState(state, currentDepth, self.cycleIndex(currentIndex)):
-                if self.DEBUG_PRINTS:
-                    print "Handling leaf state"
-                # TODO
-                # this results in heuristic value
-                # consider max and min players here also
-                currentScore = self.evaluationFunction(currentState)
-
-            if self.DEBUG_PRINTS:
-                print "===== Next round =====" \
-                        + "\ncurrentState: " + str(currentState) \
-                        + "\ncurrentDepth: " + str(currentDepth) \
-                        + "\ncurrentIndex: " + str(currentIndex) \
-                        + "\nmaxPlayer: " + str(maxPlayer) \
-                        + "\ncurrentScore: " + str(currentScore) \
-                        + "\nparentNode: " + str(parentNode)
-
-            # handle max and min players
-            # if maxPlayer:
-            # else:
-            #     if parentAlphaScore <=
-            #     if  parentBetaScore
-
-            # TODO decide by pruning whether to add state or not
-            #
-            # Push successors to stack and pop one immediately (in beginning of loop)
-            for state in successors:
-                # might need to check and handle leaf nodes here.
-                # make a decision whether to push state, not push or
-                # stop considering these successors
-
-                newNode = self.makeSearchNode(state, currentDepth + 1, self.cycleIndex(currentIndex))
-                self.addNodeToTree(newNode, currentNode)
-
-            # TODO assign sane value to selectedAction
-            if None == selectedAction:
-                selectedAction = actions[0]
+        # # TODO assign sane value to selectedAction
+        # if None == selectedAction:
+        #     selectedAction = actions[0]
 
         return selectedAction
+
+    def doSearch(self, currentNode, passedAlpha, passedBeta):
+        # currentNode = self.nextTreeNode()
+
+        currentState = currentNode[self.SEARCH_STATE_POS]
+        currentDepth = currentNode[self.SEARCH_DEPTH_POS]
+        currentIndex = currentNode[self.SEARCH_AGENT_INDEX_POS]
+        currentScore = currentNode[self.SEARCH_SCORE_POS]
+
+        currentAlpha = currentNode[self.SEARCH_ALPHA_POS]
+        currentBeta = currentNode[self.SEARCH_BETA_POS]
+
+        maxPlayer = self.isMaxPlayer(currentIndex)
+
+        actions = self.getLegalAgentActions(currentState, currentIndex)
+        successors = self.getPossibleNextStates(currentState, actions, currentIndex)
+        if self.DEBUG_PRINTS:
+            print "Got successors: " + str(successors)
+
+        # if self.rootGameState != currentNode[self.SEARCH_STATE_POS]:
+        parentNode = self.parents[currentNode]
+        if None != parentNode:
+            parentAlphaScore = parentNode[self.SEARCH_ALPHA_POS]
+            parentBetaScore = parentNode[self.SEARCH_BETA_POS]
+
+        if self.DEBUG_PRINTS:
+            print "===== Next round =====" \
+                    + "\ncurrentState: " + str(currentState) \
+                    + "\ncurrentDepth: " + str(currentDepth) \
+                    + "\ncurrentIndex: " + str(currentIndex) \
+                    + "\nmaxPlayer: " + str(maxPlayer) \
+                    + "\ncurrentScore: " + str(currentScore) \
+                    + "\nparentNode: " + str(parentNode)
+
+        # handle max and min players
+        # if maxPlayer:
+        # else:
+        #     if parentAlphaScore <=
+        #     if  parentBetaScore
+
+        # TODO decide by pruning whether to add state or not
+        #
+        # Push successors to stack and pop one immediately (in beginning of loop)
+        if self.handlingLeafState(successors, currentDepth):
+        # if self.handlingLeafState(state, currentDepth, self.cycleIndex(currentIndex)):
+            if self.DEBUG_PRINTS:
+                print "Handling leaf state"
+            # TODO
+            # this results in heuristic value
+            # consider max and min players here also
+            currentScore = self.evaluationFunction(currentState)
+
+            if self.DEBUG_PRINTS:
+                print "returning score: " + str(currentScore)
+
+            # return currentScore
+
+            # score = currentScore
+
+            return currentScore
+        else:
+            if maxPlayer:
+                v = float("-inf")
+
+                for state in successors:
+                    # might need to check and handle leaf nodes here.
+                    # make a decision whether to push state, not push or
+                    # stop considering these successors
+
+                    newNode = self.makeSearchNode(state, currentDepth + 1, self.cycleIndex(currentIndex), currentAlpha, currentBeta)
+                    self.addNodeToTree(newNode, currentNode)
+                    score = self.doSearch(newNode, passedAlpha, passedBeta)
+                    v = max(v, score)
+                    # if v > self.memberBeta:
+                    if v > passedBeta:
+                        if self.DEBUG_PRINTS:
+                            print "maxPlayer returning score early: " + str(v)
+                        return v
+                    # self.memberAlpha = max(self.memberAlpha, v)
+                    passedAlpha = max(passedAlpha, v)
+
+                if self.DEBUG_PRINTS:
+                    print "maxPlayer returning score: " + str(v)
+
+                return v
+            else:
+                v = float("inf")
+
+                for state in successors:
+                    newNode = self.makeSearchNode(state, currentDepth + 1, self.cycleIndex(currentIndex), currentAlpha, currentBeta)
+                    self.addNodeToTree(newNode, currentNode)
+                    score = self.doSearch(newNode, passedAlpha, passedBeta)
+                    v = min(v, score)
+                    # if v < self.memberAlpha:
+                    if v < passedAlpha:
+                        if self.DEBUG_PRINTS:
+                            print "minPlayer returning score early: " + str(v)
+                        return v
+                    # self.memberBeta = min(self.memberBeta, v)
+                    passedBeta = min(passedBeta, v)
+
+                if self.DEBUG_PRINTS:
+                    print "minPlayer returning score: " + str(v)
+                return v
+
+        raise Exception("Execution in unexpected place")
+
+        if self.DEBUG_PRINTS:
+            print "returning score: " + str(score)
+
+        return score
+
+        # # should return something sane
+        # if [] != actions:
+        #     return actions[0]
 
     # If 2 ghosts
     # When pacman index, next get ghost 1 index.
@@ -877,11 +949,11 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     def getGhostAmount(self):
         return self.rootGameState.getNumAgents() - 1
 
-    def makeSearchNode(self, state, depth, index):
-        betaScore = None
-        alphaScore = None
+    def makeSearchNode(self, state, depth, index, alpha, beta):
+        # betaScore = None
+        # alphaScore = None
         score = None
-        return (state, depth, index, alphaScore, betaScore, score)
+        return (state, depth, index, alpha, beta, score)
 
     def addNodeToTree(self, node, parentNode):
         self.parents[node] = parentNode
