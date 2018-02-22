@@ -434,26 +434,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
         if self.DEBUG_PRINTS:
             print "===== Max depth reached ====="
 
-    def createLayer(self, layerStates, agentIndex):
-        newStates = []
-
-        if self.DEBUG_PRINTS:
-            agentName = self.agentIndexName(agentIndex)
-            print "Creating " + agentName + " layer. Layer: " + str(self.layer)
-
-        for state in layerStates:
-            if self.DEBUG_PRINTS:
-                print "Handling state " + str((state, "debug_tuple")) + " of layerStates"
-            newStates = newStates + self.createTreeLayerForAgent(state, agentIndex)
-
-        if self.DEBUG_PRINTS:
-            print "Done creating " + agentName + " layer. Layer: " + str(self.layer)
-
-        self.layer = self.layer + 1
-
-        return newStates
-
-    # Create layer for pacman and for each ghost
+    # Create search tree layer for pacman and for each ghost
     def createLayersForRound(self, roundStates):
         ghostAmount = self.getGhostAmount()
         nextRoundStates = []
@@ -475,10 +456,25 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
         # Return states which are possible next pacman states. They will be
         # used next round to get the next possible moves.
-        # When previously returned ghost positions which were used to get
-        # pacman positions, empty actions were returned by getLegalActions.
-        # Makes sense as these possible moves for ghosts are far from pacman.
-        # Moving to them would be teleporting.
+        return newStates
+
+    def createLayer(self, layerStates, agentIndex):
+        newStates = []
+
+        if self.DEBUG_PRINTS:
+            agentName = self.agentIndexName(agentIndex)
+            print "Creating " + agentName + " layer. Layer: " + str(self.layer)
+
+        for state in layerStates:
+            if self.DEBUG_PRINTS:
+                print "Handling state " + str((state, "debug_tuple")) + " of layerStates"
+            newStates = newStates + self.createTreeLayerForAgent(state, agentIndex)
+
+        if self.DEBUG_PRINTS:
+            print "Done creating " + agentName + " layer. Layer: " + str(self.layer)
+
+        self.layer = self.layer + 1
+
         return newStates
 
     def createTreeLayerForAgent(self, gameState, agentIndex):
@@ -503,124 +499,9 @@ class MinimaxAgent(MultiAgentSearchAgent):
             action = actions[i]
 
             self.layers[state] = self.layer
-            # self.searchTree.push(self.makeSearchNode(state, tag))
             self.searchTree.push(self.makeSearchNode(state, tag, action, self.layer, gameState))
 
         return possibleNextStates
-
-    def makeSearchNode(self, state, tag, action, layer, gameState):
-        return (state, tag, action, layer, gameState)
-
-    def setStateTransitionsByMinimax(self):
-        # Stack is ordered so that states of last layer are popped first,
-        # then states of second last layer etc.
-
-        while not self.searchTree.isEmpty():
-            searchNode = self.searchTree.pop()
-            state = searchNode[self.SEARCH_STATE_POS]
-            action = searchNode[self.SEARCH_ACTION_POS]
-
-            if self.MAX_TAG == searchNode[self.SEARCH_MINMAX_POS]:
-                maxTurn = True
-            elif self.MIN_TAG == searchNode[self.SEARCH_MINMAX_POS]:
-                maxTurn = False
-            else:
-                raise Exception("Unrecognized search node minmax pos value")
-
-            # parent = self.parents[state]
-            parent = self.getParent(state, action)
-            parentState = parent[self.PARENT_STATE_POS]
-            parentAction = parent[self.PARENT_ACTION_POS]
-
-            if self.DEBUG_PRINTS:
-                print "In Minimax value calculation handling next state: " + str((state, "debug_tuple")) \
-                        + ", parent is: " + str((parent, "debug_tuple")) \
-                        + ", parentState is: " + str((parentState, "debug_tuple"))
-
-            stateLayer = self.layers[state]
-
-            if self.rootGameState == parentState:
-                parentLayer = "<not found>"
-            else:
-                parentLayer = self.layers[parentState]
-
-            if self.isLeafState(state):
-                if self.DEBUG_PRINTS:
-                    print "Evaluating state score on layer: " + str(stateLayer)
-                stateScore = self.evaluationFunction(state)
-            else:
-                if self.DEBUG_PRINTS:
-                    print "Getting preset score for state " + str((state, "debug_tuple")) \
-                            + ", stateLayer is: " + str(stateLayer)
-                stateScore = self.scores[state]
-
-            if self.DEBUG_PRINTS:
-                print "Got stateScore: " + str(stateScore)
-
-            try:
-                parentScore = self.scores[parentState]
-                if maxTurn and (stateScore > parentScore):
-                    self.scores[parentState] = stateScore
-                    self.selectedDirections[parentState] = parentAction
-                    if self.DEBUG_PRINTS:
-                        print "For state " + str((parentState, "debug_tuple")) \
-                                + "\n\tat layer: " + str(parentLayer) \
-                                + "\n\tupdated score: " + str(stateScore) \
-                                + "\n\tset selectedDirection: " + str(parentAction) \
-                                + "\n\t maxTurn: " + str(maxTurn)
-                elif (not maxTurn) and (stateScore < parentScore):
-                    self.scores[parentState] = stateScore
-                    self.selectedDirections[parentState] = parentAction
-                    if self.DEBUG_PRINTS:
-                        print "For state " + str((parentState, "debug_tuple")) \
-                                + "\n\tat layer: " + str(parentLayer) \
-                                + "\n\tupdated score: " + str(stateScore) \
-                                + "\n\tset selectedDirection: " + str(parentAction) \
-                                + "\n\t maxTurn: " + str(maxTurn)
-                else:
-                    if self.DEBUG_PRINTS:
-                        print "\tmaxTurn: " + str(maxTurn) + ", stateScore " + str(stateScore) + " not change in parent score " + str(parentScore)
-            except KeyError:
-                # Give current value to parent in case none is present.
-                self.scores[parentState] = stateScore
-                self.selectedDirections[parentState] = parentAction
-                if self.DEBUG_PRINTS:
-                    print "For state " + str((parentState, "debug_tuple")) \
-                            + "\n\t at layer: " + str(parentLayer) \
-                            + "\n\t set score: " + str(stateScore) \
-                            + "\n\t set selectedDirection: " + str(parentAction) \
-                            + "\n\t maxTurn: " + str(maxTurn)
-
-    def makeScorePairs(self, states, scores):
-        pairs = []
-
-        if len(states) != len(scores):
-            raise Exception("Need equal amount of states and scores to make pairs")
-
-        for i in range(0, len(states)):
-            pair = ()
-            pair[self.PAIR_STATE_INDEX] = states[i]
-            pair[self.PAIR_SCORE_INDEX] = score[i]
-            pairs.append(pair)
-
-        return pairs
-
-    def getLegalGhostActions(self, gameState, ghostAmount):
-        allLegalActions = []
-
-        if self.DEBUG_PRINTS:
-            print "getting legal ghost actions, ghost amount is: " + str(ghostAmount)
-
-        for i in range(self.FIRST_GHOST_INDEX, self.FIRST_GHOST_INDEX + ghostAmount):
-            legalActions = gameState.getLegalActions(i)
-            allLegalActions.append(legalActions)
-
-        gameState.getLegalActions()
-
-        return allLegalActions
-
-    def getLegalPacmanActions(self, gameState):
-        return gameState.getLegalActions(self.PACMAN_INDEX)
 
     def getLegalAgentActions(self, gameState, index):
         actions = gameState.getLegalActions(index)
@@ -635,43 +516,97 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
         for a in actions:
             state = gameState.generateSuccessor(index, a)
-
-            if self.DEBUG_PRINTS:
-                print "UNsetting leaf state: " + str((gameState, "debug_tuple"))
-            self.leafStates[gameState] = False
-
-            if self.DEBUG_PRINTS:
-                print "setting leaf state: " + str((state, "debug_tuple"))
-            self.leafStates[state] = True
-
+            self.leafUpdate(gameState, state)
             self.addParent(state, gameState, a)
+            nextStates.append(state)
 
             if self.DEBUG_PRINTS:
                 print "From state: " + str((gameState, "debug_tuple")) + ", For action " + str(a) + " got successor: " + str((state, "debug_tuple"))
 
-            nextStates.append(state)
-
         return nextStates
 
-    def getStateScores(self, states):
-        scores = []
+    def leafUpdate(self, oldState, newState):
+        if self.DEBUG_PRINTS:
+            print "UNsetting leaf state: " + str((oldState, "debug_tuple"))
+        self.leafStates[oldState] = False
 
-        for s in states:
-            score = self.evaluationFunction(s)
-            scores.append(score)
+        if self.DEBUG_PRINTS:
+            print "setting leaf state: " + str((newState, "debug_tuple"))
+        self.leafStates[newState] = True
 
-        return scores
+    # Go through all states. Use value of each state to update value of parent
+    # state if appropriate.
+    def setStateTransitionsByMinimax(self):
+        # Stack is ordered so that states of last layer are popped first,
+        # then states of second last layer etc.
+
+        while not self.searchTree.isEmpty():
+            searchNode = self.searchTree.pop()
+            state = searchNode[self.SEARCH_STATE_POS]
+            action = searchNode[self.SEARCH_ACTION_POS]
+
+            parent = self.getParent(state, action)
+
+            maxTurn = self.nodeFromMaxLayer(searchNode)
+
+            if self.DEBUG_PRINTS:
+                print "In Minimax value calculation handling next state: " + str((state, "debug_tuple")) \
+                        + ", parent is: " + str((parent, "debug_tuple")) \
+
+            stateScore = self.getScoreOfState(state)
+            self.parentScoreUpdate(parent, stateScore, maxTurn)
+
+    def parentScoreUpdate(self, parent, scoreCandidate, maxTurn):
+        parentState = parent[self.PARENT_STATE_POS]
+        parentAction = parent[self.PARENT_ACTION_POS] # parent action leading to child
+
+        if self.rootGameState == parentState:
+            parentLayer = "<not found>"
+        else:
+            parentLayer = self.layers[parentState]
+
+        try:
+            parentScore = self.scores[parentState]
+            if maxTurn and (scoreCandidate > parentScore):
+                self.scores[parentState] = scoreCandidate
+                self.selectedDirections[parentState] = parentAction
+                if self.DEBUG_PRINTS:
+                    print "For state " + str((parentState, "debug_tuple")) \
+                            + "\n\tat layer: " + str(parentLayer) \
+                            + "\n\tupdated score: " + str(scoreCandidate) \
+                            + "\n\tset selectedDirection: " + str(parentAction) \
+                            + "\n\t maxTurn: " + str(maxTurn)
+            elif (not maxTurn) and (scoreCandidate < parentScore):
+                self.scores[parentState] = scoreCandidate
+                self.selectedDirections[parentState] = parentAction
+                if self.DEBUG_PRINTS:
+                    print "For state " + str((parentState, "debug_tuple")) \
+                            + "\n\tat layer: " + str(parentLayer) \
+                            + "\n\tupdated score: " + str(scoreCandidate) \
+                            + "\n\tset selectedDirection: " + str(parentAction) \
+                            + "\n\t maxTurn: " + str(maxTurn)
+            else:
+                if self.DEBUG_PRINTS:
+                    print "\tmaxTurn: " + str(maxTurn) + ", scoreCandidate " + str(scoreCandidate) + " not change in parent score " + str(parentScore)
+        except KeyError:
+            # Give current value to parent in case none is present.
+            self.scores[parentState] = scoreCandidate
+            self.selectedDirections[parentState] = parentAction
+            if self.DEBUG_PRINTS:
+                print "For state " + str((parentState, "debug_tuple")) \
+                        + "\n\t at layer: " + str(parentLayer) \
+                        + "\n\t set score: " + str(scoreCandidate) \
+                        + "\n\t set selectedDirection: " + str(parentAction) \
+                        + "\n\t maxTurn: " + str(maxTurn)
 
     def addParent(self, childState, parentState, action):
         if self.DEBUG_PRINTS:
             print "Setting parent: " + str((parentState, "debug_tuple")) + " to child: " + str((childState, "debug_tuple"))
 
-        # try:
-        #     self.parents[childState]
-        #     except:
-
-        # self.parents[childState] = (parentState, action)
         self.parents[(childState, action)] = (parentState, action)
+
+    def makeSearchNode(self, state, tag, action, layer, gameState):
+        return (state, tag, action, layer, gameState)
 
     def getParent(self, state, action):
         return self.parents[(state, action)]
@@ -687,6 +622,34 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
     def optimalNextAction(self):
         return self.selectedDirections[self.rootGameState]
+
+    def nodeFromMaxLayer(self, node):
+        minMaxTag = node[self.SEARCH_MINMAX_POS]
+
+        if self.MAX_TAG == minMaxTag:
+            return True
+        elif self.MIN_TAG == minMaxTag:
+            return False
+        else:
+            raise Exception("Unrecognized search node minmax pos value")
+
+    def getScoreOfState(self, state):
+        stateLayer = self.layers[state]
+
+        if self.isLeafState(state):
+            if self.DEBUG_PRINTS:
+                print "Evaluating state score on layer: " + str(stateLayer)
+            stateScore = self.evaluationFunction(state)
+        else:
+            if self.DEBUG_PRINTS:
+                print "Getting preset score for state " + str((state, "debug_tuple")) \
+                        + ", stateLayer is: " + str(stateLayer)
+            stateScore = self.scores[state]
+
+        if self.DEBUG_PRINTS:
+            print "Got stateScore: " + str(stateScore)
+
+        return stateScore
 
     def agentIndexName(self, index):
         if (index == self.PACMAN_INDEX):
