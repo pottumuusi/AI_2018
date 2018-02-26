@@ -1,0 +1,1582 @@
+Starting on 2-22 at 23:23:27
+
+Question q3
+===========
+
+
+===== AlphaBetaAgent getAction() =====
+Initial values, maxDepth: 2
+
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa433c00e50>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa433c00e90>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa433c00ed0>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa433c76950>
+currentDepth: 0
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: None
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa433c00f50>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa433c00f90>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa433c00fd0>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa433c00e50>
+currentDepth: 1
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa433c76950>, 0, 0, -inf, inf, None)
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa433c00f50>
+currentDepth: 2
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa433c00e50>, 1, 1, -inf, inf, None)
+Handling leaf state
+returning score: 3.0
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa433c00f90>
+currentDepth: 2
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa433c00e50>, 1, 1, -inf, inf, None)
+Handling leaf state
+returning score: 12.0
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa433c00fd0>
+currentDepth: 2
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa433c00e50>, 1, 1, -inf, inf, None)
+Handling leaf state
+returning score: 8.0
+minPlayer returning score: 3.0
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa433c00d50>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899750>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899710>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa433c00e90>
+currentDepth: 1
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa433c76950>, 0, 0, -inf, inf, None)
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa433c00d50>
+currentDepth: 2
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa433c00e90>, 1, 1, -inf, inf, None)
+Handling leaf state
+returning score: 5.0
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899750>
+currentDepth: 2
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa433c00e90>, 1, 1, -inf, inf, None)
+Handling leaf state
+returning score: 4.0
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899710>
+currentDepth: 2
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa433c00e90>, 1, 1, -inf, inf, None)
+Handling leaf state
+returning score: 6.0
+minPlayer returning score: 4.0
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899790>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308997d0>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899810>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa433c00ed0>
+currentDepth: 1
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa433c76950>, 0, 0, -inf, inf, None)
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899790>
+currentDepth: 2
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa433c00ed0>, 1, 1, -inf, inf, None)
+Handling leaf state
+returning score: 14.0
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308997d0>
+currentDepth: 2
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa433c00ed0>, 1, 1, -inf, inf, None)
+Handling leaf state
+returning score: 1.0
+minPlayer returning score early: 1.0
+maxPlayer returning score: 4.0
+on top level the returned debugScore is: 4.0
+*** FAIL: test_cases/q3/0-lecture-6-tree.test
+***     Incorrect move for depth=2
+***         Student move: None
+***         Optimal move: Center
+***     Incorrect generated nodes for depth=2
+***         Student generated nodes: A B C D E F G H I max min1 min2 min3
+***         Correct generated nodes: A B C D E F G H max min1 min2 min3
+***     Tree:
+***                max
+***           /-/   |   \--\
+***          /      |       \
+***         /       |        \
+***      min1      min2      min3
+***       /|\      /|\       /|\ 
+***      / | \    / | \     / | \
+***     A  B  C  D  E  F   G  H  I  
+***     3 12  8  5  4  6  14  1  11
+
+===== AlphaBetaAgent getAction() =====
+Initial values, maxDepth: 3
+
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa433c00f10>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308997d0>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa433c76b90>
+currentDepth: 0
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: None
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899710>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899750>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa433c00f10>
+currentDepth: 1
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa433c76b90>, 0, 0, -inf, inf, None)
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899710>
+currentDepth: 2
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa433c00f10>, 1, 1, -inf, inf, None)
+Handling leaf state
+returning score: 4.0
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899750>
+currentDepth: 2
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa433c00f10>, 1, 1, -inf, inf, None)
+Handling leaf state
+returning score: 3.0
+minPlayer returning score: 3.0
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899810>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899850>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308997d0>
+currentDepth: 1
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa433c76b90>, 0, 0, -inf, inf, None)
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899810>
+currentDepth: 2
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308997d0>, 1, 1, -inf, inf, None)
+Handling leaf state
+returning score: 2.0
+minPlayer returning score early: 2.0
+maxPlayer returning score: 3.0
+on top level the returned debugScore is: 3.0
+*** FAIL: test_cases/q3/0-small-tree.test
+***     Incorrect move for depth=3
+***         Student move: None
+***         Optimal move: pacLeft
+***     Incorrect generated nodes for depth=3
+***         Student generated nodes: A B C deeper minLeft minRight root
+***         Correct generated nodes: A B C minLeft minRight root
+***     Tree:
+***             root
+***            /    \
+***      minLeft  minRight
+***       / \       /    \
+***      A   B     C   deeper
+***      4   3     2     |
+***                      D
+***                    1000
+
+===== AlphaBetaAgent getAction() =====
+Initial values, maxDepth: 3
+
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899950>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899990>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa433c76dd0>
+currentDepth: 0
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: None
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899a10>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899a50>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899950>
+currentDepth: 1
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa433c76dd0>, 0, 0, -inf, inf, None)
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899ad0>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899b10>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899a10>
+currentDepth: 2
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899950>, 1, 1, -inf, inf, None)
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899ad0>
+currentDepth: 3
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899a10>, 2, 0, -inf, inf, None)
+Handling leaf state
+returning score: -3.0
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899b10>
+currentDepth: 3
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899a10>, 2, 0, -inf, inf, None)
+Handling leaf state
+returning score: -9.0
+maxPlayer returning score: -3.0
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899b50>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899b90>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899a50>
+currentDepth: 2
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899950>, 1, 1, -inf, inf, None)
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899b50>
+currentDepth: 3
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899a50>, 2, 0, -inf, inf, None)
+Handling leaf state
+returning score: 10.0
+maxPlayer returning score early: 10.0
+minPlayer returning score: -3.0
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899b90>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899990>
+currentDepth: 1
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa433c76dd0>, 0, 0, -inf, inf, None)
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899bd0>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899b90>
+currentDepth: 2
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899990>, 1, 1, -inf, inf, None)
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899bd0>
+currentDepth: 3
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899b90>, 2, 0, -inf, inf, None)
+Handling leaf state
+returning score: -3.01
+maxPlayer returning score: -3.01
+minPlayer returning score early: -3.01
+maxPlayer returning score: -3.0
+on top level the returned debugScore is: -3.0
+*** FAIL: test_cases/q3/1-1-minmax.test
+***     Incorrect move for depth=3
+***         Student move: None
+***         Optimal move: Left
+***     Incorrect generated nodes for depth=3
+***         Student generated nodes: a b1 b2 c1 c2 cx d1 d2 d3 d4 dx
+***         Correct generated nodes: a b1 b2 c1 c2 cx d1 d2 d3 dx
+***     Tree:
+***                 /-----a------\
+***                /              \
+***               /                \
+***             b1                  b2
+***           /    \                 |
+***        c1        c2             cx
+***       /  \      /  \             |
+***      d1   d2  d3   d4           dx
+***     -3    -9  10    6         -3.01
+***     
+***     a - max
+***     b - min
+***     c - max
+***     
+***     Note that the minimax value of b1 is -3.
+
+===== AlphaBetaAgent getAction() =====
+Initial values, maxDepth: 3
+
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899990>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899b90>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa433c84090>
+currentDepth: 0
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: None
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899810>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308999d0>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899990>
+currentDepth: 1
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa433c84090>, 0, 0, -inf, inf, None)
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899c10>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899c50>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899810>
+currentDepth: 2
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899990>, 1, 1, -inf, inf, None)
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899c10>
+currentDepth: 3
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899810>, 2, 0, -inf, inf, None)
+Handling leaf state
+returning score: -3.0
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899c50>
+currentDepth: 3
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899810>, 2, 0, -inf, inf, None)
+Handling leaf state
+returning score: -9.0
+maxPlayer returning score: -3.0
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899c90>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899cd0>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308999d0>
+currentDepth: 2
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899990>, 1, 1, -inf, inf, None)
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899c90>
+currentDepth: 3
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308999d0>, 2, 0, -inf, inf, None)
+Handling leaf state
+returning score: 10.0
+maxPlayer returning score early: 10.0
+minPlayer returning score: -3.0
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899cd0>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899b90>
+currentDepth: 1
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa433c84090>, 0, 0, -inf, inf, None)
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899d10>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899cd0>
+currentDepth: 2
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899b90>, 1, 1, -inf, inf, None)
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899d10>
+currentDepth: 3
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899cd0>, 2, 0, -inf, inf, None)
+Handling leaf state
+returning score: -2.99
+maxPlayer returning score: -2.99
+minPlayer returning score: -2.99
+maxPlayer returning score: -2.99
+on top level the returned debugScore is: -2.99
+*** FAIL: test_cases/q3/1-2-minmax.test
+***     Incorrect move for depth=3
+***         Student move: None
+***         Optimal move: Right
+***     Incorrect generated nodes for depth=3
+***         Student generated nodes: a b1 b2 c1 c2 cx d1 d2 d3 d4 dx
+***         Correct generated nodes: a b1 b2 c1 c2 cx d1 d2 d3 dx
+***     Tree:
+***                 /-----a------\
+***                /              \
+***               /                \
+***             b1                  b2
+***           /    \                 |
+***        c1        c2             cx
+***       /  \      /  \             |
+***      d1   d2  d3   d4           dx
+***     -3    -9  10    6         -2.99
+***     
+***     a - max
+***     b - min
+***     c - max
+***     
+***     Note that the minimax value of b1 is -3.
+
+===== AlphaBetaAgent getAction() =====
+Initial values, maxDepth: 3
+
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899c10>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899c50>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa433c842d0>
+currentDepth: 0
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: None
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899950>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899c10>
+currentDepth: 1
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa433c842d0>, 0, 0, -inf, inf, None)
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899a90>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899950>
+currentDepth: 2
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899c10>, 1, 1, -inf, inf, None)
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899a90>
+currentDepth: 3
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899950>, 2, 0, -inf, inf, None)
+Handling leaf state
+returning score: 4.01
+maxPlayer returning score: 4.01
+minPlayer returning score: 4.01
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899bd0>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899d50>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899c50>
+currentDepth: 1
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa433c842d0>, 0, 0, -inf, inf, None)
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899dd0>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899e10>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899bd0>
+currentDepth: 2
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899c50>, 1, 1, -inf, inf, None)
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899dd0>
+currentDepth: 3
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899bd0>, 2, 0, -inf, inf, None)
+Handling leaf state
+returning score: 4.0
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899e10>
+currentDepth: 3
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899bd0>, 2, 0, -inf, inf, None)
+Handling leaf state
+returning score: -7.0
+maxPlayer returning score: 4.0
+minPlayer returning score early: 4.0
+maxPlayer returning score: 4.01
+on top level the returned debugScore is: 4.01
+*** FAIL: test_cases/q3/1-3-minmax.test
+***     Incorrect move for depth=3
+***         Student move: None
+***         Optimal move: Left
+***     Incorrect generated nodes for depth=3
+***         Student generated nodes: a b1 b2 c3 c4 cx d5 d6 dx
+***         Correct generated nodes: a b1 b2 c3 cx d5 d6 dx
+***     Tree:
+***                 /-----a------\
+***                /              \
+***               /                \
+***             b1                  b2
+***              |                /    \
+***             cx             c3        c4
+***              |            /   \     /   \
+***             dx           d5   d6   d7   d8
+***            4.01          4    -7   0    5
+***     
+***     a - max
+***     b - min
+***     c - max
+***     
+***     Note that the minimax value of b2 is 4.
+
+===== AlphaBetaAgent getAction() =====
+Initial values, maxDepth: 3
+
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899bd0>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899a90>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa433c84550>
+currentDepth: 0
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: None
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899c90>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899bd0>
+currentDepth: 1
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa433c84550>, 0, 0, -inf, inf, None)
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899e50>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899c90>
+currentDepth: 2
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899bd0>, 1, 1, -inf, inf, None)
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899e50>
+currentDepth: 3
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899c90>, 2, 0, -inf, inf, None)
+Handling leaf state
+returning score: 3.99
+maxPlayer returning score: 3.99
+minPlayer returning score: 3.99
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899d90>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899e90>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899a90>
+currentDepth: 1
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa433c84550>, 0, 0, -inf, inf, None)
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899f10>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899f50>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899d90>
+currentDepth: 2
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899a90>, 1, 1, -inf, inf, None)
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899f10>
+currentDepth: 3
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899d90>, 2, 0, -inf, inf, None)
+Handling leaf state
+returning score: 4.0
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899f50>
+currentDepth: 3
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899d90>, 2, 0, -inf, inf, None)
+Handling leaf state
+returning score: -7.0
+maxPlayer returning score: 4.0
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899f90>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899fd0>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899e90>
+currentDepth: 2
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899a90>, 1, 1, -inf, inf, None)
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899f90>
+currentDepth: 3
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899e90>, 2, 0, -inf, inf, None)
+Handling leaf state
+returning score: 0.0
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899fd0>
+currentDepth: 3
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899e90>, 2, 0, -inf, inf, None)
+Handling leaf state
+returning score: 5.0
+maxPlayer returning score early: 5.0
+minPlayer returning score: 4.0
+maxPlayer returning score: 4.0
+on top level the returned debugScore is: 4.0
+*** FAIL: test_cases/q3/1-4-minmax.test
+***     Incorrect move for depth=3
+***         Student move: None
+***         Optimal move: Right
+***     Tree:
+***                 /-----a------\
+***                /              \
+***               /                \
+***             b1                  b2
+***              |                /    \
+***             cx             c3        c4
+***              |            /   \     /   \
+***             dx           d5   d6   d7   d8
+***            3.99          4    -7   0    5
+***     
+***     a - max
+***     b - min
+***     c - max
+***     
+***     Note that the minimax value of b2 is 4.
+
+===== AlphaBetaAgent getAction() =====
+Initial values, maxDepth: 4
+
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899e90>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899f90>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa433c84690>
+currentDepth: 0
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: None
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899f50>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899d10>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899e90>
+currentDepth: 1
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa433c84690>, 0, 0, -inf, inf, None)
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899ed0>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0050>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899f50>
+currentDepth: 2
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899e90>, 1, 1, -inf, inf, None)
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a00d0>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0110>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899ed0>
+currentDepth: 3
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899f50>, 2, 0, -inf, inf, None)
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a00d0>
+currentDepth: 4
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899ed0>, 3, 1, -inf, inf, None)
+Handling leaf state
+returning score: -3.0
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0110>
+currentDepth: 4
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899ed0>, 3, 1, -inf, inf, None)
+Handling leaf state
+returning score: 13.0
+minPlayer returning score: -3.0
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0150>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0190>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0050>
+currentDepth: 3
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899f50>, 2, 0, -inf, inf, None)
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0150>
+currentDepth: 4
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0050>, 3, 1, -inf, inf, None)
+Handling leaf state
+returning score: 5.0
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0190>
+currentDepth: 4
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0050>, 3, 1, -inf, inf, None)
+Handling leaf state
+returning score: 9.0
+minPlayer returning score: 5.0
+maxPlayer returning score: 5.0
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0090>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a01d0>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899d10>
+currentDepth: 2
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899e90>, 1, 1, -inf, inf, None)
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0250>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0290>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0090>
+currentDepth: 3
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899d10>, 2, 0, -inf, inf, None)
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0250>
+currentDepth: 4
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0090>, 3, 1, -inf, inf, None)
+Handling leaf state
+returning score: 10.0
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0290>
+currentDepth: 4
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0090>, 3, 1, -inf, inf, None)
+Handling leaf state
+returning score: 3.0
+minPlayer returning score: 3.0
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a02d0>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0310>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a01d0>
+currentDepth: 3
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899d10>, 2, 0, -inf, inf, None)
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a02d0>
+currentDepth: 4
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a01d0>, 3, 1, -inf, inf, None)
+Handling leaf state
+returning score: -6.0
+minPlayer returning score early: -6.0
+maxPlayer returning score: 3.0
+minPlayer returning score: 3.0
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899d50>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899f90>
+currentDepth: 1
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa433c84690>, 0, 0, -inf, inf, None)
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0210>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899d50>
+currentDepth: 2
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899f90>, 1, 1, -inf, inf, None)
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0390>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0210>
+currentDepth: 3
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899d50>, 2, 0, -inf, inf, None)
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0390>
+currentDepth: 4
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0210>, 3, 1, -inf, inf, None)
+Handling leaf state
+returning score: 3.01
+minPlayer returning score: 3.01
+maxPlayer returning score: 3.01
+minPlayer returning score: 3.01
+maxPlayer returning score: 3.01
+on top level the returned debugScore is: 3.01
+*** FAIL: test_cases/q3/1-5-minmax.test
+***     Incorrect move for depth=4
+***         Student move: None
+***         Optimal move: Right
+***     Incorrect generated nodes for depth=4
+***         Student generated nodes: A B C D E F G H Z a b1 b2 c1 c2 cx d1 d2 d3 d4 dx
+***         Correct generated nodes: A B C D E F G Z a b1 b2 c1 c2 cx d1 d2 d3 d4 dx
+***     Tree:
+***                  /-----a------\
+***                 /              \
+***                /                \
+***              b1                  b2
+***            /    \                |
+***         c1        c2             cx
+***        /  \      /  \            |
+***       d1   d2  d3   d4           dx
+***      / \  / \  / \  / \          |
+***      A B  C D  E F  G H          Z
+***     -3 13 5 9 10 3 -6 8        3.01
+***     
+***     a - max
+***     b - min
+***     c - max
+***     d - min
+***     
+***     Note the minimax value of b1 is 3.
+
+===== AlphaBetaAgent getAction() =====
+Initial values, maxDepth: 4
+
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899f10>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899fd0>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa433c84990>
+currentDepth: 0
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: None
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0290>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0110>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899f10>
+currentDepth: 1
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa433c84990>, 0, 0, -inf, inf, None)
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a00d0>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a02d0>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0290>
+currentDepth: 2
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899f10>, 1, 1, -inf, inf, None)
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0190>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0210>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a00d0>
+currentDepth: 3
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0290>, 2, 0, -inf, inf, None)
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0190>
+currentDepth: 4
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a00d0>, 3, 1, -inf, inf, None)
+Handling leaf state
+returning score: -3.0
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0210>
+currentDepth: 4
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a00d0>, 3, 1, -inf, inf, None)
+Handling leaf state
+returning score: 13.0
+minPlayer returning score: -3.0
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0150>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0250>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a02d0>
+currentDepth: 3
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0290>, 2, 0, -inf, inf, None)
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0150>
+currentDepth: 4
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a02d0>, 3, 1, -inf, inf, None)
+Handling leaf state
+returning score: 5.0
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0250>
+currentDepth: 4
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a02d0>, 3, 1, -inf, inf, None)
+Handling leaf state
+returning score: 9.0
+minPlayer returning score: 5.0
+maxPlayer returning score: 5.0
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0050>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0390>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0110>
+currentDepth: 2
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899f10>, 1, 1, -inf, inf, None)
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0350>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a03d0>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0050>
+currentDepth: 3
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0110>, 2, 0, -inf, inf, None)
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0350>
+currentDepth: 4
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0050>, 3, 1, -inf, inf, None)
+Handling leaf state
+returning score: 10.0
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a03d0>
+currentDepth: 4
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0050>, 3, 1, -inf, inf, None)
+Handling leaf state
+returning score: 3.0
+minPlayer returning score: 3.0
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0410>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0450>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0390>
+currentDepth: 3
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0110>, 2, 0, -inf, inf, None)
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0410>
+currentDepth: 4
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0390>, 3, 1, -inf, inf, None)
+Handling leaf state
+returning score: -6.0
+minPlayer returning score early: -6.0
+maxPlayer returning score: 3.0
+minPlayer returning score: 3.0
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a01d0>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa430899fd0>
+currentDepth: 1
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa433c84990>, 0, 0, -inf, inf, None)
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0310>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a01d0>
+currentDepth: 2
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa430899fd0>, 1, 1, -inf, inf, None)
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a04d0>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0310>
+currentDepth: 3
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a01d0>, 2, 0, -inf, inf, None)
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a04d0>
+currentDepth: 4
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0310>, 3, 1, -inf, inf, None)
+Handling leaf state
+returning score: 2.99
+minPlayer returning score early: 2.99
+maxPlayer returning score: 2.99
+minPlayer returning score early: 2.99
+maxPlayer returning score: 3.0
+on top level the returned debugScore is: 3.0
+*** FAIL: test_cases/q3/1-6-minmax.test
+***     Incorrect move for depth=4
+***         Student move: None
+***         Optimal move: Left
+***     Incorrect generated nodes for depth=4
+***         Student generated nodes: A B C D E F G H Z a b1 b2 c1 c2 cx d1 d2 d3 d4 dx
+***         Correct generated nodes: A B C D E F G Z a b1 b2 c1 c2 cx d1 d2 d3 d4 dx
+***     Tree:
+***                  /-----a------\
+***                 /              \
+***                /                \
+***              b1                  b2
+***            /    \                |
+***         c1        c2             cx
+***        /  \      /  \            |
+***       d1   d2  d3   d4           dx
+***      / \  / \  / \  / \          |
+***      A B  C D  E F  G H          Z
+***     -3 13 5 9 10 3 -6 8        2.99
+***     
+***     a - max
+***     b - min
+***     c - max
+***     d - min
+***     
+***     Note the minimax value of b1 is 3.
+
+===== AlphaBetaAgent getAction() =====
+Initial values, maxDepth: 4
+
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a04d0>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0290>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa433c84b90>
+currentDepth: 0
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: None
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a01d0>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a04d0>
+currentDepth: 1
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa433c84b90>, 0, 0, -inf, inf, None)
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0250>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a01d0>
+currentDepth: 2
+currentIndex: 2
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a04d0>, 1, 1, -inf, inf, None)
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0110>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0250>
+currentDepth: 3
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a01d0>, 2, 2, -inf, inf, None)
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0110>
+currentDepth: 4
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0250>, 3, 0, -inf, inf, None)
+Handling leaf state
+returning score: -1.99
+maxPlayer returning score: -1.99
+minPlayer returning score: -1.99
+minPlayer returning score: -1.99
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a02d0>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0210>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0290>
+currentDepth: 1
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa433c84b90>, 0, 0, -inf, inf, None)
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0410>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0190>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a02d0>
+currentDepth: 2
+currentIndex: 2
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0290>, 1, 1, -inf, inf, None)
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0350>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0090>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0410>
+currentDepth: 3
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a02d0>, 2, 2, -inf, inf, None)
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0350>
+currentDepth: 4
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0410>, 3, 0, -inf, inf, None)
+Handling leaf state
+returning score: -1.0
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0090>
+currentDepth: 4
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0410>, 3, 0, -inf, inf, None)
+Handling leaf state
+returning score: -9.0
+maxPlayer returning score: -1.0
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0450>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0490>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0190>
+currentDepth: 3
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a02d0>, 2, 2, -inf, inf, None)
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0450>
+currentDepth: 4
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0190>, 3, 0, -inf, inf, None)
+Handling leaf state
+returning score: 4.0
+maxPlayer returning score early: 4.0
+minPlayer returning score: -1.0
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0490>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0150>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0210>
+currentDepth: 2
+currentIndex: 2
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0290>, 1, 1, -inf, inf, None)
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0550>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0590>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0490>
+currentDepth: 3
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0210>, 2, 2, -inf, inf, None)
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0550>
+currentDepth: 4
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0490>, 3, 0, -inf, inf, None)
+Handling leaf state
+returning score: 2.0
+maxPlayer returning score early: 2.0
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0510>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a05d0>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0150>
+currentDepth: 3
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0210>, 2, 2, -inf, inf, None)
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0510>
+currentDepth: 4
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0150>, 3, 0, -inf, inf, None)
+Handling leaf state
+returning score: -3.0
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a05d0>
+currentDepth: 4
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0150>, 3, 0, -inf, inf, None)
+Handling leaf state
+returning score: -2.0
+maxPlayer returning score: -2.0
+minPlayer returning score early: -2.0
+minPlayer returning score early: -2.0
+maxPlayer returning score: -1.99
+on top level the returned debugScore is: -1.99
+*** FAIL: test_cases/q3/1-7-minmax.test
+***     Incorrect move for depth=4
+***         Student move: None
+***         Optimal move: Left
+***     Incorrect generated nodes for depth=4
+***         Student generated nodes: I J K L M N O P Z a b1 b2 c3 c4 cx d5 d6 d7 d8 dx
+***         Correct generated nodes: I J K M O P Z a b1 b2 c3 c4 cx d5 d6 d7 d8 dx
+***     Tree:
+***                 /-----a------\
+***                /              \
+***               /                \
+***             b1                  b2
+***             |                 /    \
+***             cx             c3        c4
+***             |             /   \     /   \
+***             dx           d5   d6   d7   d8
+***             |           / \  / \  / \  / \ 
+***             Z           I J  K L  M N  O P
+***          -1.99        -1 -9  4 7  2 5 -3 -2
+***     
+***     a - max
+***     b - min
+***     c - min
+***     d - max
+***     
+***     Note that the minimax value of b2 is -2
+
+===== AlphaBetaAgent getAction() =====
+Initial values, maxDepth: 4
+
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0350>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a01d0>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa433c84dd0>
+currentDepth: 0
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: None
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0210>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0350>
+currentDepth: 1
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa433c84dd0>, 0, 0, -inf, inf, None)
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0550>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0210>
+currentDepth: 2
+currentIndex: 2
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0350>, 1, 1, -inf, inf, None)
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0090>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0550>
+currentDepth: 3
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0210>, 2, 2, -inf, inf, None)
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0090>
+currentDepth: 4
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0550>, 3, 0, -inf, inf, None)
+Handling leaf state
+returning score: -2.01
+maxPlayer returning score: -2.01
+minPlayer returning score: -2.01
+minPlayer returning score: -2.01
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0490>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a05d0>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a01d0>
+currentDepth: 1
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa433c84dd0>, 0, 0, -inf, inf, None)
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0450>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0110>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0490>
+currentDepth: 2
+currentIndex: 2
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a01d0>, 1, 1, -inf, inf, None)
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a00d0>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0390>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0450>
+currentDepth: 3
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0490>, 2, 2, -inf, inf, None)
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a00d0>
+currentDepth: 4
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0450>, 3, 0, -inf, inf, None)
+Handling leaf state
+returning score: -1.0
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0390>
+currentDepth: 4
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0450>, 3, 0, -inf, inf, None)
+Handling leaf state
+returning score: -9.0
+maxPlayer returning score: -1.0
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0590>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0610>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0110>
+currentDepth: 3
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0490>, 2, 2, -inf, inf, None)
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0590>
+currentDepth: 4
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0110>, 3, 0, -inf, inf, None)
+Handling leaf state
+returning score: 4.0
+maxPlayer returning score early: 4.0
+minPlayer returning score: -1.0
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0610>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0050>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a05d0>
+currentDepth: 2
+currentIndex: 2
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a01d0>, 1, 1, -inf, inf, None)
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0690>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a06d0>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0610>
+currentDepth: 3
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a05d0>, 2, 2, -inf, inf, None)
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0690>
+currentDepth: 4
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0610>, 3, 0, -inf, inf, None)
+Handling leaf state
+returning score: 2.0
+maxPlayer returning score early: 2.0
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0650>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0710>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0050>
+currentDepth: 3
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a05d0>, 2, 2, -inf, inf, None)
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0650>
+currentDepth: 4
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0050>, 3, 0, -inf, inf, None)
+Handling leaf state
+returning score: -3.0
+Got successors: []
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0710>
+currentDepth: 4
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0050>, 3, 0, -inf, inf, None)
+Handling leaf state
+returning score: -2.0
+maxPlayer returning score: -2.0
+minPlayer returning score: -2.0
+minPlayer returning score: -2.0
+maxPlayer returning score: -2.0
+on top level the returned debugScore is: -2.0
+*** FAIL: test_cases/q3/1-8-minmax.test
+***     Incorrect move for depth=4
+***         Student move: None
+***         Optimal move: Right
+***     Incorrect generated nodes for depth=4
+***         Student generated nodes: I J K L M N O P Z a b1 b2 c3 c4 cx d5 d6 d7 d8 dx
+***         Correct generated nodes: I J K M O P Z a b1 b2 c3 c4 cx d5 d6 d7 d8 dx
+***     Tree:
+***                 /-----a------\
+***                /              \
+***               /                \
+***             b1                  b2
+***             |                 /    \
+***             cx             c3        c4
+***             |             /   \     /   \
+***             dx           d5   d6   d7   d8 
+***             |           / \  / \  / \  / \ 
+***             Z           I J  K L  M N  O P
+***          -2.01        -1 -9  4 7  2 5 -3 -2
+***     
+***     a - max
+***     b - min
+***     c - min
+***     d - max
+***     
+***     Note that the minimax value of b2 is -2.01
+
+===== AlphaBetaAgent getAction() =====
+Initial values, maxDepth: 1
+
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0350>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0050>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa433c29050>
+currentDepth: 0
+currentIndex: 0
+maxPlayer: True
+currentScore: None
+parentNode: None
+Got successors: [<multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0090>, <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0110>]
+===== Next round =====
+currentState: <multiagentTestClasses.MultiagentTreeState object at 0x7fa4308a0350>
+currentDepth: 1
+currentIndex: 1
+maxPlayer: False
+currentScore: None
+parentNode: (<multiagentTestClasses.MultiagentTreeState object at 0x7fa433c29050>, 0, 0, -inf, inf, None)
+Handling leaf state
+*** FAIL: Exception raised: getScore() called on non-terminal state or before maximum depth achieved.
+*** 
+*** Traceback (most recent call last):
+***   File "/mnt/shared_home/home/tank/my/codes/kurssit/ai_2018/AI_2018/excercise_2/Code/multiagent/grading.py", line 75, in grade
+***     util.TimeoutFunction(getattr(gradingModule, q),300)(self) # Call the question's function
+***   File "/mnt/shared_home/home/tank/my/codes/kurssit/ai_2018/AI_2018/excercise_2/Code/multiagent/util.py", line 612, in __call__
+***     result = self.function(*args, **keyArgs)
+***   File "autograder.py", line 295, in <lambda>
+***     return lambda grades: question.execute(grades)
+***   File "/mnt/shared_home/home/tank/my/codes/kurssit/ai_2018/AI_2018/excercise_2/Code/multiagent/testClasses.py", line 57, in execute
+***     if not f(grades):
+***   File "autograder.py", line 290, in <lambda>
+***     return lambda grades: testCase.execute(grades, moduleDict, solutionDict)
+***   File "multiagentTestClasses.py", line 397, in execute
+***     action, generated = self.solveProblem(multiAgents)
+***   File "multiagentTestClasses.py", line 384, in solveProblem
+***     action = studentAgent.getAction(self.problem.startState)
+***   File "multiAgents.py", line 792, in getAction
+***     debugScore = self.doSearch(newNode, alpha, beta)
+***   File "multiAgents.py", line 873, in doSearch
+***     score = self.doSearch(newNode, passedAlpha, passedBeta)
+***   File "multiAgents.py", line 852, in doSearch
+***     currentScore = self.evaluationFunction(currentState)
+***   File "multiAgents.py", line 305, in scoreEvaluationFunction
+***     return currentGameState.getScore()
+***   File "multiagentTestClasses.py", line 56, in getScore
+***     raise Exception('getScore() called on non-terminal state or before maximum depth achieved.')
+*** Exception: getScore() called on non-terminal state or before maximum depth achieved.
+*** 
+
+### Question q3: 0/5 ###
+
+
+Finished at 23:23:27
+
+Provisional grades
+==================
+Question q3: 0/5
+------------------
+Total: 0/5
+
+Your grades are NOT yet registered.  To register your grades, make sure
+to follow your instructor's guidelines to receive credit on your project.
+
