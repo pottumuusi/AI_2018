@@ -1008,7 +1008,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         scores = []
         for state in newstates:
             #initial depth is 0, ghost #1 (if more ghosts, expe calls itself recursively
-            scores.append(self.expe(0, state, 1))
+            scores.append(self.expe(state, 0, 1))
 
         #the move with the best score
         nextmoveindex = scores.index(max(scores))
@@ -1019,7 +1019,9 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         return possiblemoves[nextmoveindex]
 
     #calculate an expectation of a score
-    def expe(self, curdepth, gamestate, ghostnumber):
+    def expe(self, gamestate, curdepth, ghostnumber):
+        if GLOBAL_DEBUG_PRINTS:
+            print("gamestate is lose?" + str(gamestate.isLose()) + " win? " + str(gamestate.isWin()))
         if self.depth == curdepth or gamestate.isLose() or gamestate.isWin():
             return self.evaluationFunction(gamestate)
         possibleghostmoves = gamestate.getLegalActions(ghostnumber)
@@ -1033,11 +1035,11 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         #number of agents: ghosts + pacman
         if ghostnumber == gamestate.getNumAgents() - 1:
             for state in newstates:
-                scores.append(self.maximizer(curdepth + 1, state))
+                scores.append(self.maximizer(state, curdepth + 1))
         #get moves for all ghosts
         elif ghostnumber < gamestate.getNumAgents() - 1:
             for state in newstates:
-                scores.append(self.expe(curdepth, state, ghostnumber+1))
+                scores.append(self.expe(state, curdepth, ghostnumber+1))
 
         #scores should never be empty at this point,
         if GLOBAL_DEBUG_PRINTS:
@@ -1047,7 +1049,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         return sum(scores) / len(scores)
 
     #calculate best possible next choice
-    def maximizer(self, curdepth, gamestate):
+    def maximizer(self, gamestate, curdepth):
         if GLOBAL_DEBUG_PRINTS:
             print("gamestate is lose?" + str(gamestate.isLose()) + " win? " + str(gamestate.isWin()))
         if self.depth == curdepth or gamestate.isLose() or gamestate.isWin():
@@ -1064,7 +1066,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         scores = []
         for state in newstates:
             #call for a new round of expecti, it will then in turn call this until curdepth is high enough or game ends
-            scores.append(self.expe(curdepth, state, 1))
+            scores.append(self.expe(state, curdepth, 1))
 
         if GLOBAL_DEBUG_PRINTS:
             print("legal moves in maximizer: " + ''.join(pacmanmoves))
