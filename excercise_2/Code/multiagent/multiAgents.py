@@ -113,7 +113,7 @@ class ReflexAgent(Agent):
 
         "*** YOUR CODE HERE ***"
 
-        successorGameState = currentGameState.generatePacmanSuccessor(action)
+        successorGameState = currentGameState.generatePacmanSuccessors(action)
 
         self.currentGameState = currentGameState
         self.successorGameState = successorGameState
@@ -984,15 +984,94 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
       Your expectimax agent (question 4)
     """
 
+    def getPacmanActions(self, state):
+        return state.getLegalActions(0)
+
+    def generatePacmanSuccessors(self, state, move):
+        return state.generateSuccessor(0, move)
+
     def getAction(self, gameState):
         """
           Returns the expectimax action using self.depth and self.evaluationFunction
-
           All ghosts should be modeled as choosing uniformly at random from their
           legal moves.
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        possiblemoves = self.getPacmanActions(gameState)
+
+        #states after the possible moves
+        newstates = []
+        for move in possiblemoves:
+            newstates.append(self.generatePacmanSuccessors(gameState, move))
+
+        #scores of these states
+        scores = []
+        for state in newstates:
+            #initial depth is 0, ghost #1 (if more ghosts, expe calls itself recursively
+            scores.append(self.expe(0, state, 1))
+
+        #the move with the best score
+        nextmoveindex = scores.index(max(scores))
+
+        if GLOBAL_DEBUG_PRINTS:
+            print("all scores " + ''.join(str(index) for index in scores))
+            print("next move: " + possiblemoves[nextmoveindex])
+        return possiblemoves[nextmoveindex]
+
+    #calculate an expectation of a score
+    def expe(self, curdepth, gamestate, ghostnumber):
+        if self.depth == curdepth or gamestate.isLose() or gamestate.isWin():
+            return self.evaluationFunction(gamestate)
+        possibleghostmoves = gamestate.getLegalActions(ghostnumber)
+
+        #generate the new states of game based on the possible ghost moves
+        newstates = []
+        for move in possibleghostmoves:
+            newstates.append(gamestate.generateSuccessor(ghostnumber, move))
+
+        scores = []
+        #number of agents: ghosts + pacman
+        if ghostnumber == gamestate.getNumAgents() - 1:
+            for state in newstates:
+                scores.append(self.maximizer(curdepth + 1, state))
+        #get moves for all ghosts
+        elif ghostnumber < gamestate.getNumAgents() - 1:
+            for state in newstates:
+                scores.append(self.expe(curdepth, state, ghostnumber+1))
+
+        #scores should never be empty at this point,
+        if GLOBAL_DEBUG_PRINTS:
+            print("legal moves in expectiMax: " + ''.join(possibleghostmoves))
+            print("scores at end of expectiMax is " + ''.join(str(onescore) for onescore in scores))
+        #return average of scores, each node equal chance being chosen
+        return sum(scores) / len(scores)
+
+    #calculate best possible next choice
+    def maximizer(self, curdepth, gamestate):
+        if GLOBAL_DEBUG_PRINTS:
+            print("gamestate is lose?" + str(gamestate.isLose()) + " win? " + str(gamestate.isWin()))
+        if self.depth == curdepth or gamestate.isLose() or gamestate.isWin():
+            return self.evaluationFunction(gamestate)
+
+        pacmanmoves = self.getPacmanActions(gamestate)
+
+        #generate new states based on the legal moves
+        newstates = []
+        for move in pacmanmoves:
+            newstates.append(self.generatePacmanSuccessors(gamestate, move))
+
+        #generate scores that would be got on the new states
+        scores = []
+        for state in newstates:
+            #call for a new round of expecti, it will then in turn call this until curdepth is high enough or game ends
+            scores.append(self.expe(curdepth, state, 1))
+
+        if GLOBAL_DEBUG_PRINTS:
+            print("legal moves in maximizer: " + ''.join(pacmanmoves))
+            print("scores at end of maximizer: " + ''.join(str(onescore) for onescore in scores))
+
+        return max(scores)
+
 
 def betterEvaluationFunction(currentGameState):
     """
