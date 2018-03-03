@@ -785,10 +785,11 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         # self.addNodeToTree(self.rootGameState, currentDepth, self.cycleIndex(index))
         newNode = self.makeSearchNode(self.rootGameState, currentDepth, self.cycleIndex(currentIndex), alpha, beta)
         parentNodeOfFirstNode = None
-        self.addNodeToTree(newNode, parentNodeOfFirstNode)
+        # self.addNodeToTree(newNode, parentNodeOfFirstNode)
 
         # selectedAction = self.doSearch(newNode)
         # debugScore = self.doSearch(newNode)
+
         debugScore = self.doSearch(newNode, alpha, beta)
 
         if self.DEBUG_PRINTS:
@@ -811,36 +812,103 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         currentAlpha = currentNode[self.SEARCH_ALPHA_POS]
         currentBeta = currentNode[self.SEARCH_BETA_POS]
 
-        maxPlayer = self.isMaxPlayer(currentIndex)
-
-        actions = self.getLegalAgentActions(currentState, currentIndex)
-        successors = self.getPossibleNextStates(currentState, actions, currentIndex)
-        if self.DEBUG_PRINTS:
-            print "Got successors: " + str(successors)
+        # successors = self.getPossibleNextStates(currentState, actions, currentIndex)
+        # if self.DEBUG_PRINTS:
+        #     print "Got successors: " + str(successors)
 
         # if self.rootGameState != currentNode[self.SEARCH_STATE_POS]:
-        parentNode = self.parents[currentNode]
-        if None != parentNode:
-            parentAlphaScore = parentNode[self.SEARCH_ALPHA_POS]
-            parentBetaScore = parentNode[self.SEARCH_BETA_POS]
+
+        # parentNode = self.parents[currentNode]
+        # if None != parentNode:
+        #     parentAlphaScore = parentNode[self.SEARCH_ALPHA_POS]
+        #     parentBetaScore = parentNode[self.SEARCH_BETA_POS]
 
         if self.DEBUG_PRINTS:
             print "===== Next round =====" \
                     + "\ncurrentState: " + str(currentState) \
                     + "\ncurrentDepth: " + str(currentDepth) \
                     + "\ncurrentIndex: " + str(currentIndex) \
-                    + "\nmaxPlayer: " + str(maxPlayer) \
-                    + "\ncurrentScore: " + str(currentScore) \
-                    + "\nparentNode: " + str(parentNode)
+                    + "\ncurrentScore: " + str(currentScore)
+                    # + "\nparentNode: " + str(parentNode)
+                    # + "\nmaxPlayer: " + str(maxPlayer) \
 
-        # handle max and min players
-        # if maxPlayer:
-        # else:
-        #     if parentAlphaScore <=
-        #     if  parentBetaScore
+        finalValue = self.alphaBetaSearch(currentState, passedAlpha, passedBeta, currentIndex, currentDepth)
 
-        # TODO decide by pruning whether to add state or not
-        #
+        return finalValue
+
+    def alphaBetaSearch(self, state, alpha, beta, index, depth):
+
+        if (self.getMaxDepth() == depth):
+            result = self.evaluationFunction(state)
+            maxPlayer = self.isMaxPlayer(index)
+
+            if self.DEBUG_PRINTS:
+                print "Reached leaf node. state: " + str(state) + ", depth: " + str(depth) + ", maxPlayer: " + str(maxPlayer) + ", returning: " + str(result)
+
+            return result
+
+        values = []
+
+        maxPlayer = self.isMaxPlayer(index)
+
+        actions = self.getLegalAgentActions(state, index)
+        # successors = self.getPossibleNextStates(state, actions, index)
+
+        if self.DEBUG_PRINTS:
+            print "alphaBetaSearch, " \
+                    + "\n\tstate: " + str(state) \
+                    + "\n\talpha: " + str(alpha) \
+                    + "\n\tbeta: " + str(beta) \
+                    + "\n\tindex: " + str(index) \
+                    + "\n\tdepth: " + str(depth)
+                    # + "\n\tsuccessors: " + str(successors)
+
+        # for successor in successors:
+        for action in actions:
+            successor = self.getNextState(state, action, index)
+            if self.DEBUG_PRINTS:
+                print "handling successor: " + str(successor)
+            if maxPlayer:
+                value = self.alphaBetaSearch(successor, alpha, beta, self.cycleIndex(index), depth + 1)
+                if value > alpha:
+                    alpha = value
+                if beta < value:
+                    if self.DEBUG_PRINTS:
+                        print "maxPlayer pruning, returning value: " + str(value)
+                    return value
+
+                values.append(value)
+
+                if self.DEBUG_PRINTS:
+                    print "values is: " + str(values)
+            else:
+                value = self.alphaBetaSearch(successor, alpha, beta, self.cycleIndex(index), depth + 1)
+                if value < beta:
+                    beta = value
+                if alpha > value:
+                    if self.DEBUG_PRINTS:
+                        print "minPlayer pruning, returning value: " + str(value)
+                    return value
+
+                values.append(value)
+
+                if self.DEBUG_PRINTS:
+                    print "values is: " + str(values)
+
+        if maxPlayer:
+            maxVal = max(values)
+            if self.DEBUG_PRINTS:
+                print "maxPlayer returning maxVal: " + str(maxVal)
+
+            return maxVal
+        else:
+            minVal = min(values)
+            if self.DEBUG_PRINTS:
+                print "minPlayer returning minVal: " + str(minVal)
+
+            return minVal
+
+    def oldTryOnAlphaBeta():
         # Push successors to stack and pop one immediately (in beginning of loop)
         if self.handlingLeafState(successors, currentDepth):
         # if self.handlingLeafState(state, currentDepth, self.cycleIndex(currentIndex)):
@@ -906,15 +974,6 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 
         raise Exception("Execution in unexpected place")
 
-        if self.DEBUG_PRINTS:
-            print "returning score: " + str(score)
-
-        return score
-
-        # # should return something sane
-        # if [] != actions:
-        #     return actions[0]
-
     # If 2 ghosts
     # When pacman index, next get ghost 1 index.
     # When ghost 1, next get ghost 2 index.
@@ -923,16 +982,23 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         if None == index:
             return self.PACMAN_INDEX
 
-        if self.getGhostAmount() == index:
-            return self.PACMAN_INDEX
+        nextIndex = (index + 1) % (self.getGhostAmount() + 1)
 
-        if self.PACMAN_INDEX == index:
-            return self.FIRST_GHOST_INDEX
+        if self.DEBUG_PRINTS:
+            print "cycleIndex, returning nextIndex: " + str(nextIndex) + ", ghostAmount is: " + str(self.getGhostAmount())
 
-        if index < self.PACMAN_INDEX:
-            raise Exception("Unknown index " + str(index))
+        return nextIndex
 
-        return index + 1 # next ghost position
+        # if self.getGhostAmount() == index:
+        #     return self.PACMAN_INDEX
+
+        # if self.PACMAN_INDEX == index:
+        #     return self.FIRST_GHOST_INDEX
+
+        # if index < self.PACMAN_INDEX:
+        #     raise Exception("Unknown index " + str(index))
+
+        # return index + 1 # next ghost position
 
     def getLegalAgentActions(self, gameState, index):
         return gameState.getLegalActions(index)
@@ -946,6 +1012,9 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 
         return nextStates
 
+    def getNextState(self, gameState, action, index):
+        return gameState.generateSuccessor(index, action)
+
     def getGhostAmount(self):
         return self.rootGameState.getNumAgents() - 1
 
@@ -955,9 +1024,9 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         score = None
         return (state, depth, index, alpha, beta, score)
 
-    def addNodeToTree(self, node, parentNode):
-        self.parents[node] = parentNode
-        self.searchTree.push(node)
+    # def addNodeToTree(self, node, parentNode):
+    #     self.parents[node] = parentNode
+    #     self.searchTree.push(node)
 
     def searchTreeEmpty(self):
         return self.searchTree.isEmpty()
@@ -978,6 +1047,9 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             return True
 
         return False
+
+    def getMaxDepth(self):
+        return self.depth
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
