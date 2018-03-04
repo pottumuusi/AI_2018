@@ -877,13 +877,25 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         actions = self.getLegalAgentActions(state, index)
         # successors = self.getPossibleNextStates(state, actions, index)
 
+        if ([] == actions):
+            result = self.evaluationFunction(state)
+            maxPlayer = self.isMaxPlayer(index)
+
+            if self.DEBUG_PRINTS:
+                print "Reached node with no actions. state: " + str(state) + ", depth: " + str(depth) + ", maxPlayer: " + str(maxPlayer) + ", returning: " + str(result)
+
+            self.addSelectedActionSuccessorPair(state, None, None)
+
+            return self.makeSearchResult(None, None, result)
+
         if self.DEBUG_PRINTS:
-            print "alphaBetaSearch, " \
+            print "alphaBetaSearch, go through actions next" \
                     + "\n\tstate: " + str(state) \
                     + "\n\talpha: " + str(alpha) \
                     + "\n\tbeta: " + str(beta) \
                     + "\n\tindex: " + str(index) \
-                    + "\n\tdepth: " + str(depth)
+                    + "\n\tdepth: " + str(depth) \
+                    + "\n\tactions: " + str(actions)
                     # + "\n\tsuccessors: " + str(successors)
 
         # for successor in successors:
@@ -927,6 +939,16 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 
                 if self.DEBUG_PRINTS:
                     print "results is: " + str(results)
+
+        if self.DEBUG_PRINTS:
+            print "alphaBetaSearch, final return next" \
+                    + "\n\tstate: " + str(state) \
+                    + "\n\talpha: " + str(alpha) \
+                    + "\n\tbeta: " + str(beta) \
+                    + "\n\tindex: " + str(index) \
+                    + "\n\tdepth: " + str(depth) \
+                    + "\n\tactions: " + str(actions)
+                    # + "\n\tsuccessors: " + str(successors)
 
         if maxPlayer:
             maxResult = None
