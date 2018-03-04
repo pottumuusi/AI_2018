@@ -812,7 +812,9 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         selectedAction = searchFinalAction
 
         if self.DEBUG_PRINTS:
-            print "on top level the returned searchFinalValue is: " + str(searchFinalValue)
+            print "-----------------------------------------"
+            print "on top level the returned searchFinalValue is: " + str(searchFinalValue) + ", selectedAction is: " + str(selectedAction)
+            print "-----------------------------------------"
 
         # # TODO assign sane value to selectedAction
         # if None == selectedAction:
@@ -858,23 +860,30 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         return finalResult
 
     def alphaBetaSearch(self, state, alpha, beta, index, depth):
+        actions = self.getLegalAgentActions(state, index)
 
-        if (self.getMaxDepth() == depth):
-            result = self.evaluationFunction(state)
-            maxPlayer = self.isMaxPlayer(index)
+        if (depth >= self.getMaxDepth()):
+            try:
+                maxPlayer = self.isMaxPlayer(index)
 
-            if self.DEBUG_PRINTS:
-                print "Reached leaf node. state: " + str(state) + ", depth: " + str(depth) + ", maxPlayer: " + str(maxPlayer) + ", returning: " + str(result)
+                if self.DEBUG_PRINTS:
+                    print "Reached leaf node. state: " + str(state) + ", depth: " + str(depth) + ", maxPlayer: " + str(maxPlayer) + ", maxDepth: " + str(self.getMaxDepth()) + ", actions: " + str(actions)
 
-            self.addSelectedActionSuccessorPair(state, None, None)
+                result = self.evaluationFunction(state)
 
-            return self.makeSearchResult(None, None, result)
+                if self.DEBUG_PRINTS:
+                    print "Reached leaf node. returning: " + str(result)
+
+                self.addSelectedActionSuccessorPair(state, None, None)
+
+                return self.makeSearchResult(None, None, result)
+            except Exception as e:
+                print "Encountered excpetion while handling supposed root node: " + str(e)
 
         results = []
 
         maxPlayer = self.isMaxPlayer(index)
 
-        actions = self.getLegalAgentActions(state, index)
         # successors = self.getPossibleNextStates(state, actions, index)
 
         if ([] == actions):
@@ -904,7 +913,11 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             if self.DEBUG_PRINTS:
                 print "handling successor: " + str(successor)
             if maxPlayer:
-                result = self.alphaBetaSearch(successor, alpha, beta, self.cycleIndex(index), depth + 1)
+                nextIndex = self.cycleIndex(index)
+                # if pacman layer and all ghost layes handled
+                if nextIndex < index:
+                    depth = depth + 1
+                result = self.alphaBetaSearch(successor, alpha, beta, nextIndex, depth)
                 value = result[self.AB_VALUE_POS]
                 if self.DEBUG_PRINTS:
                     print "maxPlayer got value: " + str(value) + ", alpha: " + str(alpha) + ", beta:" + str(beta)
@@ -923,7 +936,11 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 if self.DEBUG_PRINTS:
                     print "results is: " + str(results)
             else:
-                result = self.alphaBetaSearch(successor, alpha, beta, self.cycleIndex(index), depth + 1)
+                nextIndex = self.cycleIndex(index)
+                # if pacman layer and all ghost layes handled
+                if nextIndex < index:
+                    depth = depth + 1
+                result = self.alphaBetaSearch(successor, alpha, beta, self.cycleIndex(index), depth)
                 value = result[self.AB_VALUE_POS]
                 if value < beta:
                     beta = value
