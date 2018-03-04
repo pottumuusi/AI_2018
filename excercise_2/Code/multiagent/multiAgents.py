@@ -348,6 +348,14 @@ class MultiAgentSearchAgent(Agent):
         self.SEARCH_ALPHA_POS = 3
         self.SEARCH_BETA_POS = 4
         self.SEARCH_SCORE_POS = 5
+
+        self.selectedActionSuccessorPairs = {}
+        self.SASP_ACTION_POS = 0
+        self.SASP_SUCCESSOR_POS = 1
+
+        self.AB_ACTION_POS = 0
+        self.AB_STATE_POS = 1
+        self.AB_VALUE_POS = 2
         # Used by alpha-beta pruning
 
         self.PACMAN_LAYER_TURN = 0
@@ -790,10 +798,21 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         # selectedAction = self.doSearch(newNode)
         # debugScore = self.doSearch(newNode)
 
-        debugScore = self.doSearch(newNode, alpha, beta)
+        searchResult = self.doSearch(newNode, alpha, beta)
+
+        # pair = getSelectedActionSuccessorPair(self.rootGameState)
+        # while (None != pair):
+        #     action = pair[SASP_ACTION_POS]
+        #     successor = pair[SASP_SUCCESSOR_POS]
+
+        #     pair = getSelectedActionSuccessorPair(successor)
+
+        searchFinalValue = searchResult[self.AB_VALUE_POS]
+        searchFinalAction = searchResult[self.AB_ACTION_POS]
+        selectedAction = searchFinalAction
 
         if self.DEBUG_PRINTS:
-            print "on top level the returned debugScore is: " + str(debugScore)
+            print "on top level the returned searchFinalValue is: " + str(searchFinalValue)
 
         # # TODO assign sane value to selectedAction
         # if None == selectedAction:
@@ -832,9 +851,11 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                     # + "\nparentNode: " + str(parentNode)
                     # + "\nmaxPlayer: " + str(maxPlayer) \
 
-        finalValue = self.alphaBetaSearch(currentState, passedAlpha, passedBeta, currentIndex, currentDepth)
+        finalResult = self.alphaBetaSearch(currentState, passedAlpha, passedBeta, currentIndex, currentDepth)
+        # finalValue = finalResult[VALUE_POS]
+        # finalAction = finalResult[ACTION_POS]
 
-        return finalValue
+        return finalResult
 
     def alphaBetaSearch(self, state, alpha, beta, index, depth):
 
@@ -845,9 +866,11 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             if self.DEBUG_PRINTS:
                 print "Reached leaf node. state: " + str(state) + ", depth: " + str(depth) + ", maxPlayer: " + str(maxPlayer) + ", returning: " + str(result)
 
-            return result
+            self.addSelectedActionSuccessorPair(state, None, None)
 
-        values = []
+            return self.makeSearchResult(None, None, result)
+
+        results = []
 
         maxPlayer = self.isMaxPlayer(index)
 
@@ -869,44 +892,101 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             if self.DEBUG_PRINTS:
                 print "handling successor: " + str(successor)
             if maxPlayer:
-                value = self.alphaBetaSearch(successor, alpha, beta, self.cycleIndex(index), depth + 1)
+                result = self.alphaBetaSearch(successor, alpha, beta, self.cycleIndex(index), depth + 1)
+                value = result[self.AB_VALUE_POS]
+                if self.DEBUG_PRINTS:
+                    print "maxPlayer got value: " + str(value) + ", alpha: " + str(alpha) + ", beta:" + str(beta)
                 if value > alpha:
                     alpha = value
                 if beta < value:
                     if self.DEBUG_PRINTS:
                         print "maxPlayer pruning, returning value: " + str(value)
-                    return value
+                    self.addSelectedActionSuccessorPair(state, action, successor)
+                    result = self.makeSearchResult(action, successor, value)
+                    # return value
+                    return result
 
-                values.append(value)
+                results.append(self.makeSearchResult(action, successor, value))
 
                 if self.DEBUG_PRINTS:
-                    print "values is: " + str(values)
+                    print "results is: " + str(results)
             else:
-                value = self.alphaBetaSearch(successor, alpha, beta, self.cycleIndex(index), depth + 1)
+                result = self.alphaBetaSearch(successor, alpha, beta, self.cycleIndex(index), depth + 1)
+                value = result[self.AB_VALUE_POS]
                 if value < beta:
                     beta = value
                 if alpha > value:
                     if self.DEBUG_PRINTS:
                         print "minPlayer pruning, returning value: " + str(value)
-                    return value
+                    self.addSelectedActionSuccessorPair(state, action, successor)
+                    result = self.makeSearchResult(action, successor, value)
+                    # return value
+                    return result
 
-                values.append(value)
+                results.append(self.makeSearchResult(action, successor, value))
 
                 if self.DEBUG_PRINTS:
-                    print "values is: " + str(values)
+                    print "results is: " + str(results)
 
         if maxPlayer:
-            maxVal = max(values)
-            if self.DEBUG_PRINTS:
-                print "maxPlayer returning maxVal: " + str(maxVal)
+            maxResult = None
+            values = []
 
-            return maxVal
+            if self.DEBUG_PRINTS:
+                print "maxPlayer results: " + str(results)
+
+            for result in results:
+                if None == maxResult:
+                    maxResult = result
+
+                if result[self.AB_VALUE_POS] > maxResult[self.AB_VALUE_POS]:
+                    maxResult = result
+
+            # maxVal = max(values)
+            if self.DEBUG_PRINTS:
+                print "maxPlayer returning maxResult: " + str(maxResult)
+
+            self.addSelectedActionSuccessorPair(state, maxResult[self.AB_ACTION_POS], maxResult[self.AB_STATE_POS])
+
+            # return (maxResult[ACTION_POS], maxResult[VALUE_POS])
+            return maxResult
         else:
-            minVal = min(values)
-            if self.DEBUG_PRINTS:
-                print "minPlayer returning minVal: " + str(minVal)
+            minResult = None
+            values = []
 
-            return minVal
+            if self.DEBUG_PRINTS:
+                print "minPlayer results: " + str(results)
+
+            for result in results:
+                if self.DEBUG_PRINTS:
+                    print "minPlayer handling result: " + str(result)
+
+                if None == minResult:
+                    minResult = result
+
+                if self.DEBUG_PRINTS:
+                    print "comparing result: " + str(result) + ", and minResult: " + str(minResult)
+
+                if result[self.AB_VALUE_POS] < minResult[self.AB_VALUE_POS]:
+                    minResult = result
+
+            # minVal = min(values)
+            if self.DEBUG_PRINTS:
+                print "minPlayer returning minResult: " + str(minResult)
+
+            self.addSelectedActionSuccessorPair(state, minResult[self.AB_ACTION_POS], minResult[self.AB_STATE_POS])
+
+            # return (minResult[ACTION_POS], minResult[VALUE_POS])
+            return minResult
+
+    def addSelectedActionSuccessorPair(self, state, action, successor):
+        self.selectedActionSuccessorPairs[state] = (action, successor)
+
+    def getSelectedActionSuccessorPair(self, state):
+        return self.selectedActionSuccessorPairs[state]
+
+    def makeSearchResult(self, action, successor, value):
+        return (action, successor, value)
 
     def oldTryOnAlphaBeta():
         # Push successors to stack and pop one immediately (in beginning of loop)
