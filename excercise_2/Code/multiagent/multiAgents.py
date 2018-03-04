@@ -911,13 +911,14 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         for action in actions:
             successor = self.getNextState(state, action, index)
             if self.DEBUG_PRINTS:
-                print "handling successor: " + str(successor)
+                print "handling successor: " + str(successor) + ", of parent: " + str(state)
             if maxPlayer:
                 nextIndex = self.cycleIndex(index)
+                nextDepth = depth
                 # if pacman layer and all ghost layes handled
                 if nextIndex < index:
-                    depth = depth + 1
-                result = self.alphaBetaSearch(successor, alpha, beta, nextIndex, depth)
+                    nextDepth = depth + 1
+                result = self.alphaBetaSearch(successor, alpha, beta, nextIndex, nextDepth)
                 value = result[self.AB_VALUE_POS]
                 if self.DEBUG_PRINTS:
                     print "maxPlayer got value: " + str(value) + ", alpha: " + str(alpha) + ", beta:" + str(beta)
@@ -937,10 +938,11 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                     print "results is: " + str(results)
             else:
                 nextIndex = self.cycleIndex(index)
+                nextDepth = depth
                 # if pacman layer and all ghost layes handled
                 if nextIndex < index:
-                    depth = depth + 1
-                result = self.alphaBetaSearch(successor, alpha, beta, self.cycleIndex(index), depth)
+                    nextDepth = depth + 1
+                result = self.alphaBetaSearch(successor, alpha, beta, self.cycleIndex(index), nextDepth)
                 value = result[self.AB_VALUE_POS]
                 if value < beta:
                     beta = value
